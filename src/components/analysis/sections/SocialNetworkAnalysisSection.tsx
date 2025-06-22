@@ -12,7 +12,7 @@ import {
   ChartTooltipContent,
   type ChartConfig 
 } from '../../ui/chart';
-import { Crown, Users, MessageCircle, Network } from 'lucide-react';
+import { Crown, Users, MessageCircle, Network, AtSign, TrendingUp } from 'lucide-react';
 import type { AnalysisResultsSocialNetwork } from '../../../sdk/types/task-response';
 
 interface SocialNetworkAnalysisSectionProps {
@@ -42,6 +42,18 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
     connections: stats.total_degree
   }));
 
+  // @艾特网络数据
+  const mentionNetwork = socialNetworkData.mention_network;
+  const topMentionedData = mentionNetwork.top_mentioned_users.slice(0, 8).map(([user, count]) => ({
+    user: user.slice(-8), // 显示用户ID的后8位
+    mentions: count
+  }));
+
+  const topMentionersData = mentionNetwork.mention_patterns.top_mentioners.slice(0, 8).map(([user, count]) => ({
+    user: user.slice(-8), // 显示用户ID的后8位
+    mentions: count
+  }));
+
   const chartConfig = {
     pagerank: {
       label: "PageRank",
@@ -52,7 +64,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
       color: "var(--chart-2)",
     },
     closeness: {
-      label: "接近中心性", 
+      label: "接近中心性",
       color: "var(--chart-3)",
     },
     size: {
@@ -66,6 +78,10 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
     connections: {
       label: "连接数",
       color: "var(--chart-2)",
+    },
+    mentions: {
+      label: "@艾特次数",
+      color: "var(--chart-4)",
     }
   } satisfies ChartConfig;
 
@@ -83,7 +99,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
 
       {/* 紧凑的网络概览统计 */}
       <div className="p-4 rounded-lg border bg-muted/30">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
             <div className="min-w-0">
@@ -110,6 +126,20 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
             <div className="min-w-0">
               <div className="text-xs text-muted-foreground">社区数量</div>
               <div className="font-semibold">{socialNetworkData.communities.num_communities}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <AtSign className="h-4 w-4 text-pink-500 flex-shrink-0" />
+            <div className="min-w-0">
+              <div className="text-xs text-muted-foreground">总@艾特数</div>
+              <div className="font-semibold">{mentionNetwork.total_mentions.toLocaleString()}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-cyan-500 flex-shrink-0" />
+            <div className="min-w-0">
+              <div className="text-xs text-muted-foreground">@艾特互动率</div>
+              <div className="font-semibold">{(mentionNetwork.mention_patterns.mention_reciprocity_rate * 100).toFixed(1)}%</div>
             </div>
           </div>
         </div>
@@ -201,6 +231,89 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
           </ChartContainer>
         </div>
       </div>
+
+      {/* @艾特网络分析部分 */}
+      {mentionNetwork.has_mentions && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <AtSign className="h-5 w-5 text-pink-500" />
+            <h4 className="text-lg font-semibold">@艾特网络分析</h4>
+          </div>
+
+          {/* @艾特网络统计概览 */}
+          <div className="p-4 rounded-lg border bg-muted/30">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <AtSign className="h-4 w-4 text-pink-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">被@艾特用户数</div>
+                  <div className="font-semibold">{mentionNetwork.unique_mentioned_users.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Network className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">@艾特关系数</div>
+                  <div className="font-semibold">{mentionNetwork.mention_patterns.total_mention_relationships.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-cyan-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">互相@艾特关系</div>
+                  <div className="font-semibold">{mentionNetwork.mention_patterns.mutual_mention_relationships.toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Network className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs text-muted-foreground">@艾特网络密度</div>
+                  <div className="font-semibold">{mentionNetwork.mention_graph_stats.density.toFixed(4)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* @艾特网络图表 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 最常被@艾特用户 */}
+            <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+              <h5 className="font-medium mb-3 text-sm">最常被@艾特用户 (Top 8)</h5>
+              <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                <BarChart data={topMentionedData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" fontSize={12} />
+                  <YAxis dataKey="user" type="category" width={60} fontSize={12} />
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    labelFormatter={(value) => `用户: ${value}`}
+                    formatter={(value) => [value, '@艾特次数']}
+                  />
+                  <Bar dataKey="mentions" fill="var(--chart-4)" radius={2} />
+                </BarChart>
+              </ChartContainer>
+            </div>
+
+            {/* 最爱@艾特别人的用户 */}
+            <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+              <h5 className="font-medium mb-3 text-sm">最爱@艾特别人的用户 (Top 8)</h5>
+              <ChartContainer config={chartConfig} className="h-[200px] w-full">
+                <BarChart data={topMentionersData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" fontSize={12} />
+                  <YAxis dataKey="user" type="category" width={60} fontSize={12} />
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    labelFormatter={(value) => `用户: ${value}`}
+                    formatter={(value) => [value, '@艾特次数']}
+                  />
+                  <Bar dataKey="mentions" fill="var(--chart-5)" radius={2} />
+                </BarChart>
+              </ChartContainer>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
