@@ -193,7 +193,7 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
           )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-4 gap-6">
           {tasks.map((task, index) => (
             <TaskListItem
               key={task.task_id}
@@ -267,7 +267,7 @@ function TaskListItem({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="p-4 rounded-lg border bg-background hover:bg-muted/30 transition-colors"
+      className="p-4 rounded-lg border bg-muted/50 hover:bg-muted/30 transition-colors"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">
@@ -281,7 +281,7 @@ function TaskListItem({
                 {getStatusText(task.status)}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground">
               {task.message}
             </p>
             <p className="text-xs text-muted-foreground">

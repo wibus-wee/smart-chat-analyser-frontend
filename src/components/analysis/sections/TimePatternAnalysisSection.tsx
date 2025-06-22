@@ -138,7 +138,7 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
       {/* 紧凑的图表网格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* 小时分布 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">24小时活动分布</h4>
           <ChartContainer config={chartConfig} className="h-[180px] w-full">
             <BarChart data={hourlyData}>
@@ -152,7 +152,7 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
         </div>
 
         {/* 周分布 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">一周活动分布</h4>
           <ChartContainer config={chartConfig} className="h-[180px] w-full">
             <BarChart data={weeklyData}>
@@ -166,7 +166,7 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
         </div>
 
         {/* 时段分布 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">时段活动分布</h4>
           <ChartContainer config={chartConfig} className="h-[180px] w-full">
             <BarChart data={periodData}>
@@ -181,7 +181,7 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
 
         {/* 异常检测结果 - 紧凑版 */}
         {timePatternData.anomaly_detection.anomalies_detected && (
-          <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <div className="p-4 rounded-lg border bg-muted/50">
             <h4 className="font-medium mb-3 text-sm">异常检测结果</h4>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -201,7 +201,7 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
         )}
 
         {/* 每日趋势 - 跨列显示 */}
-        <div className="md:col-span-2 xl:col-span-4 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="md:col-span-2 xl:col-span-4 p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">每日活动趋势 (最近30天)</h4>
           <ChartContainer config={chartConfig} className="h-[160px] w-full">
             <LineChart data={dailyData.slice(-30)}>

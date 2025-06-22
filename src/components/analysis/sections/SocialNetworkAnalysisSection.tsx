@@ -112,7 +112,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
       {/* 图表网格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {/* 网络概览统计 - 作为第一个图表项 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-4 text-sm">网络概览统计</h4>
 
           {/* 基础网络统计 */}
@@ -202,7 +202,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
 
         
         {/* 社区详情面板 */}
-        <div className="xl:col-span-1 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="xl:col-span-1 p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">社区详情 (Top {Math.min(communityDetails.length, 5)})</h4>
           <div className="space-y-3 max-h-[350px] overflow-y-auto">
             {communityDetails.slice(0, 5).map((community) => (
@@ -252,7 +252,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
         </div>
 
         {/* 社区规模分布 - 增加高度 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">社区规模分布</h4>
           <ChartContainer config={chartConfig} className="h-[350px] w-full">
             <BarChart data={communityData}>
@@ -269,7 +269,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
         </div>
 
         {/* 最活跃用户 */}
-        <div className="md:col-span-2 xl:col-span-2 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="md:col-span-2 xl:col-span-2 p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">最活跃用户 (Top 10)</h4>
           <ChartContainer config={chartConfig} className="h-[220px] w-full">
             <BarChart data={topUsersData}>
@@ -290,7 +290,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
         </div>
 
         {/* 中心性指标 - 增加高度 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/50">
           <h4 className="font-medium mb-3 text-sm">用户中心性指标 (Top 8)</h4>
           <ChartContainer config={chartConfig} className="h-[220px] w-full">
             <BarChart data={centralityData.slice(0, 8)} layout="vertical">
@@ -354,7 +354,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
           {/* @艾特网络图表 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 最常被@艾特用户 */}
-            <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+            <div className="p-4 rounded-lg border bg-muted/50">
               <h5 className="font-medium mb-3 text-sm">最常被@艾特用户 (Top 8)</h5>
               <ChartContainer config={chartConfig} className="h-[280px] w-full">
                 <BarChart data={topMentionedData} layout="vertical">
@@ -372,7 +372,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
             </div>
 
             {/* 最爱@艾特别人的用户 */}
-            <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+            <div className="p-4 rounded-lg border bg-muted/50">
               <h5 className="font-medium mb-3 text-sm">最爱@艾特别人的用户 (Top 8)</h5>
               <ChartContainer config={chartConfig} className="h-[280px] w-full">
                 <BarChart data={topMentionersData} layout="vertical">
