@@ -9,16 +9,9 @@ import { PreloadApi } from './endpoints/preload';
 import type {
   ApiClientConfig,
   HealthResponse,
-  SystemStatsResponse,
-  QueueStats,
-  UserCacheStatusResponse,
-  GeneralPreloadStatusResponse,
-  ModelInfoResponse,
+  QueueStatsResponse,
   AnalyzersResponse,
-  PreloadModelResponse,
-  UserCacheReloadResponse,
-  PreloadReloadResponse,
-  ClearModelResponse,
+  ModelInfo,
 } from './types';
 
 /**
@@ -97,38 +90,18 @@ export class ChatlogAnalyserSDK {
    */
   async getServiceStatus(): Promise<{
     health: HealthResponse | null;
-    system: SystemStatsResponse | null;
-    queue: QueueStats | null;
-    userCache: UserCacheStatusResponse | null;
-    preload: GeneralPreloadStatusResponse | null;
-    models: ModelInfoResponse | null;
     analyzers: AnalyzersResponse | null;
   }> {
     const [
       health,
-      systemStats,
-      queueStats,
-      userCacheStatus,
-      preloadStatus,
-      modelInfo,
       analyzers,
     ] = await Promise.allSettled([
       this.health.getHealth(),
-      this.system.getSystemStats(),
-      this.system.getQueueStats(),
-      this.userCache.getCacheStatus(),
-      this.preload.getPreloadStatus(),
-      this.models.getModelInfo(),
       this.analyzers.getAnalyzers(),
     ]);
 
     return {
       health: health.status === 'fulfilled' ? health.value : null,
-      system: systemStats.status === 'fulfilled' ? systemStats.value : null,
-      queue: queueStats.status === 'fulfilled' ? queueStats.value : null,
-      userCache: userCacheStatus.status === 'fulfilled' ? userCacheStatus.value : null,
-      preload: preloadStatus.status === 'fulfilled' ? preloadStatus.value : null,
-      models: modelInfo.status === 'fulfilled' ? modelInfo.value : null,
       analyzers: analyzers.status === 'fulfilled' ? analyzers.value : null,
     };
   }
@@ -140,21 +113,15 @@ export class ChatlogAnalyserSDK {
    */
   async initializeService(options: {
     preloadModels?: boolean;
-    reloadUserCache?: boolean;
-    reloadPreload?: boolean;
   } = {}): Promise<{
     success: boolean;
     results: {
-      models?: PreloadModelResponse;
-      userCache?: UserCacheReloadResponse;
-      preload?: PreloadReloadResponse;
+      models?: any;
     };
     errors: string[];
   }> {
     const results: {
-      models?: PreloadModelResponse;
-      userCache?: UserCacheReloadResponse;
-      preload?: PreloadReloadResponse;
+      models?: any;
     } = {};
     const errors: string[] = [];
 
@@ -164,24 +131,6 @@ export class ChatlogAnalyserSDK {
         results.models = await this.models.preloadAllModels();
       } catch (error) {
         errors.push(`模型预加载失败: ${error}`);
-      }
-    }
-
-    // 重新加载用户缓存
-    if (options.reloadUserCache) {
-      try {
-        results.userCache = await this.userCache.reloadCache();
-      } catch (error) {
-        errors.push(`用户缓存重新加载失败: ${error}`);
-      }
-    }
-
-    // 重新加载预加载资源
-    if (options.reloadPreload) {
-      try {
-        results.preload = await this.preload.reloadAll();
-      } catch (error) {
-        errors.push(`预加载资源重新加载失败: ${error}`);
       }
     }
 
@@ -199,12 +148,12 @@ export class ChatlogAnalyserSDK {
   async cleanupService(): Promise<{
     success: boolean;
     results: {
-      models?: ClearModelResponse;
+      models?: any;
     };
     errors: string[];
   }> {
     const results: {
-      models?: ClearModelResponse;
+      models?: any;
     } = {};
     const errors: string[] = [];
 

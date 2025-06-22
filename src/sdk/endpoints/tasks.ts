@@ -1,18 +1,18 @@
 import type { ChatlogAnalyserClient } from '../client';
 import {
-  CreateTaskRequestSchema,
-  CreateTaskResponseSchema,
-  TaskStatusResponseSchema,
+  TaskRequestSchema,
+  TaskSubmitResponseSchema,
+  TaskInfoSchema,
   TaskResultResponseSchema,
-  CancelTaskResponseSchema,
-  TaskListResponseSchema,
+  TaskCancelResponseSchema,
+  TasksListResponseSchema,
   TaskListQuerySchema,
-  type CreateTaskRequest,
-  type CreateTaskResponse,
-  type TaskStatusResponse,
+  type TaskRequest,
+  type TaskSubmitResponse,
+  type TaskInfo,
   type TaskResultResponse,
-  type CancelTaskResponse,
-  type TaskListResponse,
+  type TaskCancelResponse,
+  type TasksListResponse,
   type TaskListQuery,
   type TaskData,
   type TaskStatus,
@@ -30,10 +30,10 @@ export class TasksApi {
    * @param query 查询参数
    * @returns 任务列表响应
    */
-  async getTaskList(query: TaskListQuery = {}): Promise<TaskListResponse> {
+  async getTaskList(query: TaskListQuery = {}): Promise<TasksListResponse> {
     const validatedQuery = validateRequest(query, TaskListQuerySchema, 'getTaskList');
-    const response = await this.client.get<TaskListResponse>('/tasks', { query: validatedQuery });
-    return validateResponse(response.data, TaskListResponseSchema, 'getTaskList');
+    const response = await this.client.get<TasksListResponse>('/tasks', { query: validatedQuery });
+    return validateResponse(response.data, TasksListResponseSchema, 'getTaskList');
   }
 
   /**
@@ -47,7 +47,7 @@ export class TasksApi {
     status: TaskStatus,
     limit: number = 20,
     offset: number = 0
-  ): Promise<TaskListResponse> {
+  ): Promise<TasksListResponse> {
     return this.getTaskList({ status, limit, offset });
   }
 
@@ -56,7 +56,7 @@ export class TasksApi {
    * @param limit 返回数量限制
    * @returns 任务列表响应
    */
-  async getRunningTasks(limit: number = 20): Promise<TaskListResponse> {
+  async getRunningTasks(limit: number = 20): Promise<TasksListResponse> {
     return this.getTasksByStatus('running', limit);
   }
 
@@ -66,7 +66,7 @@ export class TasksApi {
    * @param offset 偏移量
    * @returns 任务列表响应
    */
-  async getCompletedTasks(limit: number = 20, offset: number = 0): Promise<TaskListResponse> {
+  async getCompletedTasks(limit: number = 20, offset: number = 0): Promise<TasksListResponse> {
     return this.getTasksByStatus('completed', limit, offset);
   }
 
@@ -75,15 +75,15 @@ export class TasksApi {
    * @param taskData 任务数据
    * @returns 任务创建响应
    */
-  async createTask(taskData: TaskData): Promise<CreateTaskResponse> {
-    const request: CreateTaskRequest = {
+  async createTask(taskData: TaskData): Promise<TaskSubmitResponse> {
+    const request: TaskRequest = {
       task_type: 'chatlog_analysis',
       task_data: taskData,
     };
 
-    const validatedRequest = validateRequest(request, CreateTaskRequestSchema, 'createTask');
-    const response = await this.client.post<CreateTaskResponse>('/tasks', validatedRequest);
-    return validateResponse(response.data, CreateTaskResponseSchema, 'createTask');
+    const validatedRequest = validateRequest(request, TaskRequestSchema, 'createTask');
+    const response = await this.client.post<TaskSubmitResponse>('/tasks', validatedRequest);
+    return validateResponse(response.data, TaskSubmitResponseSchema, 'createTask');
   }
 
   /**
@@ -91,9 +91,9 @@ export class TasksApi {
    * @param taskId 任务ID
    * @returns 任务状态响应
    */
-  async getTaskStatus(taskId: string): Promise<TaskStatusResponse> {
-    const response = await this.client.get<TaskStatusResponse>(`/tasks/${taskId}`);
-    return validateResponse(response.data, TaskStatusResponseSchema, 'getTaskStatus');
+  async getTaskStatus(taskId: string): Promise<TaskInfo> {
+    const response = await this.client.get<TaskInfo>(`/tasks/${taskId}`);
+    return validateResponse(response.data, TaskInfoSchema, 'getTaskStatus');
   }
 
   /**
@@ -111,9 +111,9 @@ export class TasksApi {
    * @param taskId 任务ID
    * @returns 取消任务响应
    */
-  async cancelTask(taskId: string): Promise<CancelTaskResponse> {
-    const response = await this.client.post<CancelTaskResponse>(`/tasks/${taskId}/cancel`);
-    return validateResponse(response.data, CancelTaskResponseSchema, 'cancelTask');
+  async cancelTask(taskId: string): Promise<TaskCancelResponse> {
+    const response = await this.client.post<TaskCancelResponse>(`/tasks/${taskId}/cancel`);
+    return validateResponse(response.data, TaskCancelResponseSchema, 'cancelTask');
   }
 
   /**

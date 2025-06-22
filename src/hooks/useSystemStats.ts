@@ -1,40 +1,42 @@
 import useSWR from 'swr';
 import sdkClient from '../lib/sdk-client';
 
-export function useSystemHealth() {
+/**
+ * 系统统计信息 Hook
+ */
+export function useSystemStats() {
   const { data, error, isLoading, mutate } = useSWR(
-    'system-health',
-    () => sdkClient.health.getHealth(),
+    'system-stats',
+    () => sdkClient.system.getSystemStats(),
     {
       refreshInterval: 30000, // 每30秒刷新一次
       revalidateOnFocus: true,
-      errorRetryCount: 3,
     }
   );
 
-  const isHealthy = data?.status === 'healthy';
-
   return {
-    health: data,
-    isHealthy,
+    systemStats: data,
     isLoading,
     error,
     refresh: mutate,
   };
 }
 
-export function useSystemOverview() {
+/**
+ * 队列统计信息 Hook
+ */
+export function useQueueStats() {
   const { data, error, isLoading, mutate } = useSWR(
-    'system-overview',
-    () => sdkClient.getServiceStatus(),
+    'queue-stats',
+    () => sdkClient.system.getQueueStats(),
     {
-      refreshInterval: 60000, // 每分钟刷新一次
+      refreshInterval: 10000, // 每10秒刷新一次
       revalidateOnFocus: true,
     }
   );
 
   return {
-    overview: data,
+    queueStats: data,
     isLoading,
     error,
     refresh: mutate,

@@ -14,20 +14,32 @@ import {
   Download,
   Trash2,
   Play,
-  Square} from 'lucide-react';
+  Square,
+  Users,
+  RefreshCw,
+  Database,
+  BarChart3,
+  Cpu} from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
 import { Progress } from '../ui/progress';
 import { useSystemHealth, useSystemOverview } from '../../hooks/useSystemHealth';
 import { useModelManagement } from '../../hooks/useModelManagement';
+import { useUserCache } from '../../hooks/useUserCache';
+import { usePreload } from '../../hooks/usePreload';
+import { useSystemStats, useQueueStats } from '../../hooks/useSystemStats';
 import { toast } from 'sonner';
 import { TopNavigation } from './TopNavigation';
+import { formatAnalyzerLabel } from '@/lib/utils';
 
 export function StatusBar() {
   const { health, isHealthy, isLoading: healthLoading } = useSystemHealth();
   const { overview, isLoading: overviewLoading } = useSystemOverview();
+  console.log(overview?.analyzers);
   const {
     modelsWithStatus,
+    modelInfo,
+    preloadStatus: modelPreloadStatus,
     isLoading: modelManagementLoading,
     isOperating,
     preloadModel,
@@ -35,7 +47,38 @@ export function StatusBar() {
     clearModelCache,
     preloadAllModels,
     clearAllModelCache,
+    error: modelError,
   } = useModelManagement();
+
+  // 调试信息
+  console.log('模型管理调试信息:', {
+    modelInfo,
+    modelPreloadStatus,
+    modelsWithStatus,
+    modelManagementLoading,
+    modelError,
+    overviewLoading
+  });
+
+  // 用户缓存管理
+  const {
+    cacheStatus,
+    isLoading: userCacheLoading,
+    isOperating: userCacheOperating,
+    reloadCache,
+  } = useUserCache();
+
+  // 预加载管理
+  const {
+    preloadStatus,
+    isLoading: preloadLoading,
+    isOperating: preloadOperating,
+    reloadAll: reloadAllPreload,
+  } = usePreload();
+
+  // 系统统计
+  const { systemStats, isLoading: systemStatsLoading } = useSystemStats();
+  const { queueStats, isLoading: queueStatsLoading } = useQueueStats();
 
   const getStatusIcon = () => {
     if (healthLoading) return <Clock className="h-4 w-4 animate-spin" />;
@@ -95,6 +138,26 @@ export function StatusBar() {
     }
   };
 
+  // 用户缓存操作处理函数
+  const handleReloadUserCache = async () => {
+    try {
+      await reloadCache();
+      toast.success('用户缓存重新加载成功');
+    } catch (error) {
+      toast.error(`用户缓存重新加载失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  };
+
+  // 预加载操作处理函数
+  const handleReloadAllPreload = async () => {
+    try {
+      await reloadAllPreload();
+      toast.success('预加载资源重新加载成功');
+    } catch (error) {
+      toast.error(`预加载资源重新加载失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
@@ -118,7 +181,7 @@ export function StatusBar() {
               <span className="text-sm">{getStatusText()}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
+          <PopoverContent className="w-80 max-h-[95vh] overflow-scroll" align="end">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4" />
@@ -191,15 +254,53 @@ export function StatusBar() {
                     <Activity className="h-4 w-4" />
                     <h4 className="text-sm font-medium">系统概览</h4>
                   </div>
-                  {overview.queue && (
+                  {overview.health && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <span>队列状态: 正常运行</span>
+                      <span>服务状态: 正常运行</span>
+                    </div>
+                  )}
+                  {overview.analyzers && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <span>分析器: {overview.analyzers.total_count || 0} 个可用</span>
+                      </div>
+                      {overview.analyzers.analyzer_info && Object.keys(overview.analyzers.analyzer_info).length > 0 && (
+                        <div className="space-y-2 mt-2">
+                          <div className="flex items-center gap-1">
+                            <List className="h-3 w-3" />
+                            <h5 className="text-xs font-medium text-muted-foreground">分析器列表</h5>
+                          </div>
+                          <div className="space-y-1">
+                            {Object.entries(overview.analyzers.analyzer_info).map(([key, analyzer]: [string, any]) => (
+                              <div key={key} className="flex justify-between text-xs">
+                                <div className="flex items-center gap-1">
+                                  <span className="capitalize" title={analyzer.class_info?.doc || analyzer.metadata?.description}>
+                                    {formatAnalyzerLabel(analyzer.name)} <span className="text-muted-foreground">
+                                        ({analyzer.metadata?.description})
+                                        </span>
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {analyzer.is_registered ? (
+                                    <CheckCircle className="h-3 w-3 text-green-500" />
+                                  ) : (
+                                    <AlertCircle className="h-3 w-3 text-red-500" />
+                                  )}
+                                  <span className={analyzer.is_registered ? 'text-green-600' : 'text-red-600'}>
+                                    {analyzer.is_registered ? '已挂载' : '未挂载'}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
 
-              {(overviewLoading || modelsWithStatus.length > 0) && (
+              {(overviewLoading || modelManagementLoading || modelsWithStatus.length > 0) && (
                 <div className="space-y-3 pt-2 border-t">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -212,61 +313,323 @@ export function StatusBar() {
                     </div>
                   </div>
 
-
-
-                  {/* 批量操作 */}
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePreloadAll}
-                      disabled={isOperating}
-                      className="flex-1 h-7 text-xs"
-                    >
-                      <Download className="h-3 w-3 mr-1" />
-                      预加载全部
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleClearAll}
-                      disabled={isOperating}
-                      className="flex-1 h-7 text-xs"
-                    >
-                      <Trash2 className="h-3 w-3 mr-1" />
-                      清除全部
-                    </Button>
-                  </div>
-
-                  {/* 模型列表 */}
-                  {modelsWithStatus.length > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-1">
-                        <List className="h-3 w-3" />
-                        <h5 className="text-xs font-medium text-muted-foreground">模型列表</h5>
-                      </div>
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {modelsWithStatus.map((model) => (
-                          <ModelStatusCard
-                            key={model.key}
-                            model={model}
-                            onPreload={() => handlePreloadModel(model.key)}
-                            onCancel={() => handleCancelPreload(model.key)}
-                            onClearCache={() => handleClearCache(model.key)}
-                            isOperating={isOperating}
-                          />
-                        ))}
-                      </div>
+                  {modelManagementLoading ? (
+                    <div className="text-center py-4 text-xs text-muted-foreground">
+                      <Clock className="h-4 w-4 animate-spin mx-auto mb-2" />
+                      加载模型信息中...
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      {/* 批量操作 */}
+                      <div className="flex gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePreloadAll}
+                          disabled={isOperating || modelManagementLoading}
+                          className="flex-1 h-7 text-xs"
+                        >
+                          {isOperating ? (
+                            <Clock className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Download className="h-3 w-3 mr-1" />
+                          )}
+                          预加载全部
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleClearAll}
+                          disabled={isOperating || modelManagementLoading}
+                          className="flex-1 h-7 text-xs"
+                        >
+                          {isOperating ? (
+                            <Clock className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3 w-3 mr-1" />
+                          )}
+                          清除全部
+                        </Button>
+                      </div>
 
-                  {modelsWithStatus.length === 0 && !modelManagementLoading && (
-                    <div className="text-center py-2 text-xs text-muted-foreground">
-                      暂无可用模型
-                    </div>
+                      {/* 模型列表 */}
+                      {modelsWithStatus.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1">
+                            <List className="h-3 w-3" />
+                            <h5 className="text-xs font-medium text-muted-foreground">模型列表</h5>
+                          </div>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {modelsWithStatus.map((model) => (
+                              <ModelStatusCard
+                                key={model.key}
+                                model={model}
+                                onPreload={() => handlePreloadModel(model.key)}
+                                onCancel={() => handleCancelPreload(model.key)}
+                                onClearCache={() => handleClearCache(model.key)}
+                                isOperating={isOperating}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {modelsWithStatus.length === 0 && !modelManagementLoading && (
+                        <div className="text-center py-2 text-xs text-muted-foreground">
+                          暂无可用模型
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
+
+              {/* 系统统计模块 */}
+              {(systemStatsLoading || queueStatsLoading || systemStats || queueStats) && (
+                <div className="space-y-3 pt-2 border-t">
+                  <div className="flex items-center gap-2">
+                    {systemStatsLoading || queueStatsLoading ? (
+                      <Clock className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <BarChart3 className="h-4 w-4" />
+                    )}
+                    <h4 className="text-sm font-medium">系统统计</h4>
+                  </div>
+
+                  {systemStatsLoading || queueStatsLoading ? (
+                    <div className="text-center py-4 text-xs text-muted-foreground">
+                      <Clock className="h-4 w-4 animate-spin mx-auto mb-2" />
+                      加载统计信息中...
+                    </div>
+                  ) : (
+                    <>
+                      {queueStats && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1">
+                            <List className="h-3 w-3" />
+                            <h5 className="text-xs font-medium text-muted-foreground">任务队列</h5>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            {queueStats.queue?.pending !== undefined && (
+                              <div className="flex justify-between">
+                                <span>等待中:</span>
+                                <span className="text-yellow-600">{queueStats.queue.pending}</span>
+                              </div>
+                            )}
+                            {queueStats.queue?.running !== undefined && (
+                              <div className="flex justify-between">
+                                <span>运行中:</span>
+                                <span className="text-blue-600">{queueStats.queue.running}</span>
+                              </div>
+                            )}
+                            {queueStats.queue?.completed !== undefined && (
+                              <div className="flex justify-between">
+                                <span>已完成:</span>
+                                <span className="text-green-600">{queueStats.queue.completed}</span>
+                              </div>
+                            )}
+                            {queueStats.queue?.failed !== undefined && (
+                              <div className="flex justify-between">
+                                <span>失败:</span>
+                                <span className="text-red-600">{queueStats.queue.failed}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {systemStats && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-1">
+                            <Cpu className="h-3 w-3" />
+                            <h5 className="text-xs font-medium text-muted-foreground">系统资源</h5>
+                          </div>
+                          {systemStats.model_manager?.memory_usage && (
+                            <div className="text-xs text-muted-foreground">
+                              <div className="flex justify-between">
+                                <span>内存使用:</span>
+                                <span>
+                                  {typeof systemStats.model_manager.memory_usage === 'string'
+                                    ? systemStats.model_manager.memory_usage
+                                    : systemStats.model_manager.memory_usage.rss || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {systemStats.model_manager?.loaded_models && (
+                            <div className="text-xs text-muted-foreground">
+                              <div className="flex justify-between">
+                                <span>已加载模型:</span>
+                                <span>{systemStats.model_manager.loaded_models.length}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* 用户缓存管理模块 */}
+              <div className="space-y-3 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {userCacheLoading ? (
+                      <Clock className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Users className="h-4 w-4" />
+                    )}
+                    <h4 className="text-sm font-medium">用户缓存</h4>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReloadUserCache}
+                    disabled={userCacheOperating || userCacheLoading}
+                    className="h-6 w-6 p-0"
+                    title="重新加载用户缓存"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${userCacheOperating || userCacheLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+
+                {userCacheLoading ? (
+                  <div className="text-center py-4 text-xs text-muted-foreground">
+                    <Clock className="h-4 w-4 animate-spin mx-auto mb-2" />
+                    加载用户缓存信息中...
+                  </div>
+                ) : cacheStatus ? (
+                  <div className="space-y-1 text-xs">
+                    {cacheStatus.cache_status && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>加载状态:</span>
+                          <span className={`${cacheStatus.cache_status.is_loaded ? 'text-green-600' : 'text-red-600'}`}>
+                            {cacheStatus.cache_status.is_loaded ? '已加载' : '未加载'}
+                          </span>
+                        </div>
+                        {cacheStatus.cache_status.contacts_count !== undefined && (
+                          <div className="flex justify-between">
+                            <span>联系人:</span>
+                            <span className="text-muted-foreground">{cacheStatus.cache_status.contacts_count}</span>
+                          </div>
+                        )}
+                        {cacheStatus.cache_status.chatrooms_count !== undefined && (
+                          <div className="flex justify-between">
+                            <span>群聊:</span>
+                            <span className="text-muted-foreground">{cacheStatus.cache_status.chatrooms_count}</span>
+                          </div>
+                        )}
+                        {cacheStatus.cache_status.total_names !== undefined && (
+                          <div className="flex justify-between">
+                            <span>总名称数:</span>
+                            <span className="text-muted-foreground">{cacheStatus.cache_status.total_names}</span>
+                          </div>
+                        )}
+                        {cacheStatus.cache_status.last_update && (
+                          <div className="flex justify-between">
+                            <span>更新时间:</span>
+                            <span className="text-muted-foreground">
+                              {new Date(cacheStatus.cache_status.last_update).toLocaleTimeString()}
+                            </span>
+                          </div>
+                        )}
+                        {cacheStatus.cache_status.load_error && (
+                          <div className="flex justify-between">
+                            <span>错误:</span>
+                            <span className="text-red-600 text-xs truncate" title={cacheStatus.cache_status.load_error}>
+                              {cacheStatus.cache_status.load_error}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-2 text-xs text-muted-foreground">
+                    暂无缓存信息
+                  </div>
+                )}
+              </div>
+
+              {/* 预加载管理模块 */}
+              <div className="space-y-3 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {preloadLoading ? (
+                      <Clock className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Database className="h-4 w-4" />
+                    )}
+                    <h4 className="text-sm font-medium">预加载管理</h4>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReloadAllPreload}
+                    disabled={preloadOperating || preloadLoading}
+                    className="h-6 w-6 p-0"
+                    title="重新加载所有预加载资源"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${preloadOperating || preloadLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+
+                {preloadLoading ? (
+                  <div className="text-center py-4 text-xs text-muted-foreground">
+                    <Clock className="h-4 w-4 animate-spin mx-auto mb-2" />
+                    加载预加载信息中...
+                  </div>
+                ) : preloadStatus ? (
+                  <div className="space-y-1 text-xs">
+                    {preloadStatus.preload_status && (
+                      <>
+                        <div className="flex justify-between">
+                          <span>状态:</span>
+                          <span className={`${
+                            preloadStatus.preload_status.status === 'completed' ? 'text-green-600' :
+                            preloadStatus.preload_status.status === 'failed' ? 'text-red-600' :
+                            'text-yellow-600'
+                          }`}>
+                            {preloadStatus.preload_status.status === 'completed' ? '已完成' :
+                             preloadStatus.preload_status.status === 'failed' ? '失败' :
+                             preloadStatus.preload_status.status}
+                          </span>
+                        </div>
+                        {preloadStatus.preload_status.duration !== undefined && (
+                          <div className="flex justify-between">
+                            <span>耗时:</span>
+                            <span className="text-muted-foreground">
+                              {(preloadStatus.preload_status.duration * 1000).toFixed(0)}ms
+                            </span>
+                          </div>
+                        )}
+                        {preloadStatus.preload_status.error && (
+                          <div className="flex justify-between">
+                            <span>错误:</span>
+                            <span className="text-red-600 text-xs truncate" title={preloadStatus.preload_status.error}>
+                              {preloadStatus.preload_status.error}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {preloadStatus.timestamp && (
+                      <div className="flex justify-between">
+                        <span>更新时间:</span>
+                        <span className="text-muted-foreground">
+                          {new Date(preloadStatus.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-2 text-xs text-muted-foreground">
+                    暂无预加载信息
+                  </div>
+                )}
+              </div>
             </div>
           </PopoverContent>
         </Popover>

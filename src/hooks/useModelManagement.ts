@@ -102,13 +102,22 @@ export function useModelManagement() {
 
   // 获取模型状态信息
   const getModelStatus = useCallback((modelKey: string): PreloadStatus | null => {
-    if (!preloadStatus?.status || typeof preloadStatus.status !== 'object') {
-      return null;
+    // 优先从 preloadStatus 获取
+    if (preloadStatus?.status && typeof preloadStatus.status === 'object') {
+      const statuses = preloadStatus.status as Record<string, PreloadStatus>;
+      if (statuses[modelKey]) {
+        return statuses[modelKey];
+      }
     }
-    
-    const statuses = preloadStatus.status as Record<string, PreloadStatus>;
-    return statuses[modelKey] || null;
-  }, [preloadStatus]);
+
+    // 如果 preloadStatus 没有，尝试从 modelInfo.preload_status 获取
+    if (modelInfo?.preload_status && typeof modelInfo.preload_status === 'object') {
+      const statuses = modelInfo.preload_status as Record<string, PreloadStatus>;
+      return statuses[modelKey] || null;
+    }
+
+    return null;
+  }, [preloadStatus, modelInfo]);
 
   // 检查模型是否正在操作中
   const isModelOperating = useCallback((modelKey: string): boolean => {
@@ -119,11 +128,11 @@ export function useModelManagement() {
   // 获取所有可用模型及其状态
   const getModelsWithStatus = useCallback(() => {
     if (!modelInfo?.available_models) return [];
-    
+
     return modelInfo.available_models.map(modelKey => {
       const status = getModelStatus(modelKey);
-      const isLoaded = modelInfo.loaded_models.includes(modelKey);
-      
+      const isLoaded = modelInfo.loaded_models?.includes(modelKey) || false;
+
       return {
         key: modelKey,
         name: status?.model_name || modelKey,

@@ -53,11 +53,10 @@ export const ExecutionInfoSchema = z.object({
 });
 export type ExecutionInfo = z.infer<typeof ExecutionInfoSchema>;
 
-export const ModelInfoSchema = z.object({
+const ModelInfoSchema = z.object({
     "model_name": z.string(),
     "type": z.string(), // Was TypeSchema
 });
-export type ModelInfo = z.infer<typeof ModelInfoSchema>;
 
 export const SentimentSchema = z.object({
     "negative": z.number(),
