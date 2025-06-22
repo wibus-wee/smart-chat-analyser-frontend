@@ -282,7 +282,7 @@ function TaskListItem({
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {task.message}
+              {task.message.slice(0,55)}...
             </p>
             <p className="text-xs text-muted-foreground">
               创建时间: {formatDate(task.created_at)}

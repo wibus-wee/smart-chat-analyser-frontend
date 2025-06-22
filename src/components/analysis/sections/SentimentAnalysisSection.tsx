@@ -179,7 +179,7 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
         {/* 情感分布饼图 - 紧凑版 */}
         <div className="p-4 rounded-lg border bg-muted/30">
           <h4 className="font-medium mb-3 text-sm">情感分布</h4>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
+          <ChartContainer config={chartConfig} className="h-[280px] w-full">
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent />} />
               <Pie
