@@ -3,18 +3,11 @@ import { useRouter } from '@tanstack/react-router';
 import {
   ArrowRight,
   Activity,
-  Brain,
   BarChart3,
   Clock,
-  MessageSquare,
   TrendingUp,
   Users,
-  Zap,
-  Sparkles,
-  Target,
-  Lightbulb,
-  BookOpen,
-  Play
+  Sparkles
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { TaskCreator } from '../analysis/TaskCreator';
@@ -53,25 +46,6 @@ export function HomePage() {
       title: "社交网络",
       description: "分析群聊中的互动关系，发现核心成员",
       category: "关系分析"
-    }
-  ];
-
-  // 使用场景数据
-  const useCases = [
-    {
-      icon: <Target className="h-5 w-5" />,
-      title: "个人关系分析",
-      description: "深入了解与朋友、家人的沟通模式，改善关系质量"
-    },
-    {
-      icon: <Lightbulb className="h-5 w-5" />,
-      title: "工作沟通优化",
-      description: "分析团队沟通效率，发现协作中的改进点"
-    },
-    {
-      icon: <BookOpen className="h-5 w-5" />,
-      title: "学习习惯研究",
-      description: "追踪学习群聊的活跃度，优化学习计划"
     }
   ];
 

@@ -7,7 +7,6 @@ import {
   Globe,
   Mail,
   ExternalLink,
-  Info,
   BookOpen,
   Bug,
   MessageSquare
