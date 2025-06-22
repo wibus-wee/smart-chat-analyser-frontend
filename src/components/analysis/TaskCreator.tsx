@@ -33,7 +33,7 @@ export function TaskCreator({ onTaskCreated, onCancel }: TaskCreatorProps) {
   // 聊天记录 API 相关 hooks
   const { isConnected } = useChatlogConnection();
   const { targets, isLoading: isLoadingTargets } = useChatTargets();
-  const { recentTargets, isLoading: isLoadingRecent } = useRecentChatTargets(50);
+  const { recentTargets, isLoading: isLoadingRecent } = useRecentChatTargets(100);
 
   // 准备聊天对象选项
   const chatTargetOptions: ComboboxOption[] = [
