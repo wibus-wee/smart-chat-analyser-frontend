@@ -150,12 +150,12 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
         </div>
       </div>
 
-      {/* 图表网格 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 情感分布饼图 */}
-        <div className="p-6 rounded-lg border bg-gradient-to-br from-background to-muted/20">
-          <h4 className="font-medium mb-4">情感分布</h4>
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+      {/* 紧凑的图表网格 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {/* 情感分布饼图 - 紧凑版 */}
+        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <h4 className="font-medium mb-3 text-sm">情感分布</h4>
+          <ChartContainer config={chartConfig} className="h-[200px] w-full">
             <PieChart>
               <ChartTooltip content={<ChartTooltipContent />} />
               <Pie
@@ -164,54 +164,54 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
+                outerRadius={60}
               />
               <ChartLegend content={<ChartLegendContent />} />
             </PieChart>
           </ChartContainer>
         </div>
 
-        {/* 置信度分布 */}
-        <div className="p-6 rounded-lg border bg-gradient-to-br from-background to-muted/20">
-          <h4 className="font-medium mb-4">置信度分布</h4>
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        {/* 置信度分布 - 紧凑版 */}
+        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <h4 className="font-medium mb-3 text-sm">置信度分布</h4>
+          <ChartContainer config={chartConfig} className="h-[200px] w-full">
             <BarChart data={confidenceHistogramData}>
               <CartesianGrid vertical={false} />
-              <XAxis dataKey="bin" />
-              <YAxis />
+              <XAxis dataKey="bin" fontSize={12} />
+              <YAxis fontSize={12} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="count" fill="var(--chart-1)" radius={4} />
+              <Bar dataKey="count" fill="var(--chart-1)" radius={2} />
             </BarChart>
           </ChartContainer>
         </div>
-      </div>
 
-      {/* 时间序列图 */}
-      <div className="p-6 rounded-lg border bg-gradient-to-br from-background to-muted/20">
-        <h4 className="font-medium mb-4">情感时间序列</h4>
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
-          <LineChart data={timeSeriesData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" />
-            <YAxis />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Line
-              type="monotone"
-              dataKey="sentiment"
-              stroke="var(--chart-1)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="confidence"
-              stroke="var(--chart-2)"
-              strokeWidth={2}
-              dot={false}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-          </LineChart>
-        </ChartContainer>
+        {/* 时间序列图 - 跨列显示 */}
+        <div className="md:col-span-2 xl:col-span-3 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <h4 className="font-medium mb-3 text-sm">情感时间序列</h4>
+          <ChartContainer config={chartConfig} className="h-[180px] w-full">
+            <LineChart data={timeSeriesData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="time" fontSize={12} />
+              <YAxis fontSize={12} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Line
+                type="monotone"
+                dataKey="sentiment"
+                stroke="var(--chart-1)"
+                strokeWidth={1.5}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="confidence"
+                stroke="var(--chart-2)"
+                strokeWidth={1.5}
+                dot={false}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+            </LineChart>
+          </ChartContainer>
+        </div>
       </div>
     </motion.div>
   );
