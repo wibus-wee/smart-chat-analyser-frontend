@@ -39,12 +39,17 @@ export function useAnalysisTask() {
   };
 }
 
-export function useTaskStatus(taskId: string | null) {
+export function useTaskStatus(taskId: string | null, options?: { disablePolling?: boolean }) {
   const { data, error, isLoading, mutate } = useSWR(
     taskId ? ['task-status', taskId] : null,
     () => sdkClient.tasks.getTaskStatus(taskId!),
     {
       refreshInterval: (data) => {
+        // 如果禁用轮询，则不进行自动刷新
+        if (options?.disablePolling) {
+          return 0;
+        }
+
         // 如果任务还在进行中，每2秒刷新一次
         if (data?.status === 'pending' || data?.status === 'running') {
           return 2000;

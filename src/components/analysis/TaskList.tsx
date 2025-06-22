@@ -299,7 +299,7 @@ function TaskListItem({
         )}
 
         {/* 操作按钮 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-col">
           <Button onClick={onSelect} variant="outline" size="sm">
             <Eye className="h-4 w-4 mr-1" />
             查看

@@ -33,9 +33,12 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
 
   // WebSocket 连接状态
   const { isConnected: wsConnected, isConnecting: wsConnecting, error: wsError } = useAutoWebSocketConnection();
-  
-  // 任务状态和结果
-  const { taskStatus, isLoading: statusLoading, error: statusError, refresh: refreshStatus } = useTaskStatus(taskId);
+
+  // 任务状态和结果 - 当 WebSocket 连接正常时禁用轮询
+  const { taskStatus, isLoading: statusLoading, error: statusError, refresh: refreshStatus } = useTaskStatus(
+    taskId,
+    { disablePolling: wsConnected }
+  );
   const { taskResult, isLoading: resultLoading, error: resultError } = useTaskResult(
     taskStatus?.status === 'completed' ? taskId : null
   );
@@ -167,7 +170,7 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
             <WifiOff className="h-4 w-4 text-red-500" />
           )}
           <span className="text-sm text-muted-foreground">
-            {wsConnecting ? '连接中...' : wsConnected ? '实时连接' : '离线模式'}
+            {wsConnecting ? '连接中...' : wsConnected ? '实时模式（WebSocket）' : '轮询模式（每2秒更新一次）'}
           </span>
           {isSubscribed && (
             <Badge variant="outline" className="text-xs">
@@ -255,7 +258,7 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            实时连接失败，将使用轮询模式获取任务状态。错误: {wsError.message}
+            实时连接失败，已切换到轮询模式获取任务状态（每2秒更新一次）。错误: {wsError.message}
           </AlertDescription>
         </Alert>
       )}
