@@ -234,14 +234,14 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
                 <div className="mt-2 pt-2 border-t border-border/30">
                   <div className="text-xs text-muted-foreground mb-1">成员预览:</div>
                   <div className="flex flex-wrap gap-1">
-                    {community.members.slice(0, 3).map((member, idx) => (
+                    {community.members.slice(0, 10).map((member, idx) => (
                       <span key={idx} className="text-xs bg-background/50 px-1.5 py-0.5 rounded truncate">
                         {member.user_name}
                       </span>
                     ))}
-                    {community.totalMembers > 3 && (
+                    {community.totalMembers > 10 && (
                       <span className="text-xs text-muted-foreground">
-                        +{community.totalMembers - 3}
+                        +{community.totalMembers - 10}
                       </span>
                     )}
                   </div>
