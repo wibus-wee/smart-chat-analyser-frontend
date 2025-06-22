@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion';
+import { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import {
   Bar,
   BarChart,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   XAxis,
@@ -18,8 +17,12 @@ import {
   ChartLegendContent,
   type ChartConfig
 } from '../../ui/chart';
-import { Heart, TrendingUp, MessageSquare, Target } from 'lucide-react';
+import { Button } from '../../ui/button';
+import { Heart, TrendingUp, MessageSquare, Target, Eye, EyeOff, Loader2 } from 'lucide-react';
 import type { AnalysisResultsSentiment } from '../../../sdk/types/task-response';
+
+// 懒加载时间序列图表组件
+const LazyTimeSeriesChart = lazy(() => import('./LazyTimeSeriesChart'));
 
 interface SentimentAnalysisSectionProps {
   sentimentData: AnalysisResultsSentiment;
@@ -27,37 +30,43 @@ interface SentimentAnalysisSectionProps {
 }
 
 export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnalysisSectionProps) {
+  const [showTimeSeriesChart, setShowTimeSeriesChart] = useState(false);
+
   // 情感分布饼图数据
-  const sentimentPieData = [
-    { 
-      name: '积极', 
+  const sentimentPieData = useMemo(() => [
+    {
+      name: '积极',
       value: sentimentData.sentiment_percentage.positive,
       fill: 'var(--chart-1)'
     },
-    { 
-      name: '中性', 
+    {
+      name: '中性',
       value: sentimentData.sentiment_percentage.neutral,
       fill: 'var(--chart-2)'
     },
-    { 
-      name: '消极', 
+    {
+      name: '消极',
       value: sentimentData.sentiment_percentage.negative,
       fill: 'var(--chart-3)'
     }
-  ];
+  ], [sentimentData.sentiment_percentage]);
 
   // 置信度直方图数据
-  const confidenceHistogramData = sentimentData.chart_data.confidence_histogram.bins.map((bin, index) => ({
-    bin,
-    count: sentimentData.chart_data.confidence_histogram.counts[index]
-  }));
+  const confidenceHistogramData = useMemo(() =>
+    sentimentData.chart_data.confidence_histogram.bins.map((bin, index) => ({
+      bin,
+      count: sentimentData.chart_data.confidence_histogram.counts[index]
+    })), [sentimentData.chart_data.confidence_histogram]
+  );
 
-  // 时间序列数据
-  const timeSeriesData = sentimentData.chart_data.time_series.x.map((x, index) => ({
-    time: x,
-    sentiment: sentimentData.chart_data.time_series.sentiment[index],
-    confidence: sentimentData.chart_data.time_series.confidence[index]
-  }));
+  // 检查时间序列数据量
+  const timeSeriesDataSize = sentimentData.chart_data.time_series.x.length;
+  const isLargeDataset = timeSeriesDataSize > 1000;
+
+  // 切换时间序列图表显示
+  const toggleTimeSeriesChart = useCallback(() => {
+    setShowTimeSeriesChart(prev => !prev);
+  }, []);
 
   const chartConfig = {
     "积极": {
@@ -200,32 +209,65 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
           </ChartContainer>
         </div>
 
-        {/* 时间序列图 - 跨列显示 */}
+        {/* 时间序列图 - 跨列显示，支持异步渲染 */}
         <div className="md:col-span-2 xl:col-span-3 p-4 rounded-lg border bg-muted/30">
-          <h4 className="font-medium mb-3 text-sm">情感时间序列</h4>
-          <ChartContainer config={chartConfig} className="h-[180px] w-full">
-            <LineChart data={timeSeriesData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" fontSize={12} />
-              <YAxis fontSize={12} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                type="monotone"
-                dataKey="sentiment"
-                stroke="var(--chart-1)"
-                strokeWidth={1.5}
-                dot={false}
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-medium text-sm">情感时间序列</h4>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {timeSeriesDataSize.toLocaleString()} 个数据点
+                {isLargeDataset && ' (大数据集)'}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleTimeSeriesChart}
+                className="gap-1"
+              >
+                {showTimeSeriesChart ? (
+                  <>
+                    <EyeOff className="h-3 w-3" />
+                    隐藏
+                  </>
+                ) : (
+                  <>
+                    <Eye className="h-3 w-3" />
+                    {isLargeDataset ? '异步加载' : '显示'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {showTimeSeriesChart ? (
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-[180px]">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-sm text-muted-foreground">
+                  加载时间序列图表...
+                </span>
+              </div>
+            }>
+              <LazyTimeSeriesChart
+                timeSeriesData={sentimentData.chart_data.time_series}
+                chartConfig={chartConfig}
               />
-              <Line
-                type="monotone"
-                dataKey="confidence"
-                stroke="var(--chart-2)"
-                strokeWidth={1.5}
-                dot={false}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-            </LineChart>
-          </ChartContainer>
+            </Suspense>
+          ) : (
+            <div className="flex items-center justify-center h-[180px] border-2 border-dashed border-muted-foreground/20 rounded-lg">
+              <div className="text-center">
+                <TrendingUp className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  点击"显示"按钮加载时间序列图表
+                </p>
+                {isLargeDataset && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    数据量较大，将使用异步渲染优化性能
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
