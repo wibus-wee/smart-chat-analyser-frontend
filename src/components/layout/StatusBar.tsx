@@ -21,6 +21,7 @@ import { Progress } from '../ui/progress';
 import { useSystemHealth, useSystemOverview } from '../../hooks/useSystemHealth';
 import { useModelManagement } from '../../hooks/useModelManagement';
 import { toast } from 'sonner';
+import { TopNavigation } from './TopNavigation';
 
 export function StatusBar() {
   const { health, isHealthy, isLoading: healthLoading } = useSystemHealth();
@@ -106,6 +107,8 @@ export function StatusBar() {
           <h1 className="text-xl font-semibold">聊天日志分析器</h1>
         </div>
       </div>
+
+      <TopNavigation />
 
       <div className="flex items-center gap-4">
         <Popover>

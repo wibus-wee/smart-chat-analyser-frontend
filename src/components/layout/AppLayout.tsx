@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { StatusBar } from './StatusBar';
-import { TopNavigation } from './TopNavigation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -10,7 +9,6 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <StatusBar />
-      <TopNavigation />
       
       <motion.main
         initial={{ opacity: 0, y: 20 }}

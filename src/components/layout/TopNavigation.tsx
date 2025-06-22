@@ -34,7 +34,7 @@ export function TopNavigation() {
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center justify-between px-6 py-4"
+      className="flex items-center justify-between ml-[-70px]"
     >
       <div className="flex items-center gap-1">
         {navigationItems.map((item) => {
