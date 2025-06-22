@@ -10,14 +10,15 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
+import {
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-  type ChartConfig 
+  type ChartConfig
 } from '../../ui/chart';
+import { Heart, TrendingUp, MessageSquare, Target } from 'lucide-react';
 import type { AnalysisResultsSentiment } from '../../../sdk/types/task-response';
 
 interface SentimentAnalysisSectionProps {
@@ -59,15 +60,15 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
   }));
 
   const chartConfig = {
-    positive: {
+    "积极": {
       label: "积极",
       color: "var(--chart-1)",
     },
-    neutral: {
-      label: "中性", 
+    "中性": {
+      label: "中性",
       color: "var(--chart-2)",
     },
-    negative: {
+    "消极": {
       label: "消极",
       color: "var(--chart-3)",
     },
@@ -97,63 +98,77 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
         <h3 className="text-lg font-semibold">情感分析</h3>
       </div>
 
-      {/* 紧凑的概览统计 */}
-      <div className="p-4 rounded-lg border bg-muted/30">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0"></div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">平均情感分数</div>
-              <div className="font-semibold">{sentimentData.average_sentiment.toFixed(3)}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 flex-shrink-0"></div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">平均置信度</div>
-              <div className="font-semibold">{sentimentData.average_confidence.toFixed(3)}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-purple-500 flex-shrink-0"></div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">总消息数</div>
-              <div className="font-semibold">{sentimentData.total_messages.toLocaleString()}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-orange-500 flex-shrink-0"></div>
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">情感趋势</div>
-              <div className="font-semibold">{sentimentData.sentiment_trend.trend}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 情感分布百分比 */}
-        <div className="mt-3 pt-3 border-t border-border/50">
-          <div className="text-xs text-muted-foreground mb-2">情感分布</div>
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span>积极 {sentimentData.sentiment_percentage.positive.toFixed(1)}%</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-gray-500"></div>
-              <span>中性 {sentimentData.sentiment_percentage.neutral.toFixed(1)}%</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-red-500"></div>
-              <span>消极 {sentimentData.sentiment_percentage.negative.toFixed(1)}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 紧凑的图表网格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {/* 情感分析概览统计卡片 - 垂直布局优化 */}
+        <div className="p-4 rounded-lg border bg-muted/30 flex flex-col justify-between">
+          <h4 className="font-medium mb-4 text-sm">情感分析概览</h4>
+
+          {/* 主要统计指标 - 2x2 网格布局 */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <Heart className="h-5 w-5 text-blue-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">平均情感</div>
+                <div className="font-semibold text-lg">{sentimentData.average_sentiment.toFixed(3)}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Target className="h-5 w-5 text-green-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">平均置信度</div>
+                <div className="font-semibold text-lg">{sentimentData.average_confidence.toFixed(3)}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <MessageSquare className="h-5 w-5 text-purple-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">总消息数</div>
+                <div className="font-semibold text-lg">{sentimentData.total_messages.toLocaleString()}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <TrendingUp className="h-5 w-5 text-orange-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">情感趋势</div>
+                <div className="font-semibold text-lg">{sentimentData.sentiment_trend.trend}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 分割线 */}
+          <div className="border-t border-border/50 my-3"></div>
+
+          {/* 情感分布 - 垂直列表布局 */}
+          <div>
+            <div className="text-xs text-muted-foreground mb-3">情感分布</div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm">积极</span>
+                </div>
+                <span className="font-medium">{sentimentData.sentiment_percentage.positive.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-gray-500"></div>
+                  <span className="text-sm">中性</span>
+                </div>
+                <span className="font-medium">{sentimentData.sentiment_percentage.neutral.toFixed(1)}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                  <span className="text-sm">消极</span>
+                </div>
+                <span className="font-medium">{sentimentData.sentiment_percentage.negative.toFixed(1)}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
         {/* 情感分布饼图 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/30">
           <h4 className="font-medium mb-3 text-sm">情感分布</h4>
           <ChartContainer config={chartConfig} className="h-[200px] w-full">
             <PieChart>
@@ -172,7 +187,7 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
         </div>
 
         {/* 置信度分布 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="p-4 rounded-lg border bg-muted/30">
           <h4 className="font-medium mb-3 text-sm">置信度分布</h4>
           <ChartContainer config={chartConfig} className="h-[200px] w-full">
             <BarChart data={confidenceHistogramData}>
@@ -186,7 +201,7 @@ export function SentimentAnalysisSection({ sentimentData, icon }: SentimentAnaly
         </div>
 
         {/* 时间序列图 - 跨列显示 */}
-        <div className="md:col-span-2 xl:col-span-3 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        <div className="md:col-span-2 xl:col-span-3 p-4 rounded-lg border bg-muted/30">
           <h4 className="font-medium mb-3 text-sm">情感时间序列</h4>
           <ChartContainer config={chartConfig} className="h-[180px] w-full">
             <LineChart data={timeSeriesData}>

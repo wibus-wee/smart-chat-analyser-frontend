@@ -35,6 +35,18 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
     size
   }));
 
+  // 社区详情数据 - 使用sorted_communities获取按大小排序的社区
+  const communityDetails = socialNetworkData.communities.sorted_communities.slice(0, 10).map(([communityId, members]) => ({
+    id: communityId,
+    name: `社区 ${communityId + 1}`,
+    size: members.length,
+    members: members.slice(0, 10), // 只显示前10个成员
+    totalMembers: members.length,
+    topMember: members.reduce((prev, current) =>
+      (prev.message_count > current.message_count) ? prev : current
+    )
+  }));
+
   // 最活跃用户数据
   const topUsersData = socialNetworkData.user_activity.top_active_users.slice(0, 10).map(([userId, stats]) => ({
     user: userId.slice(-8), // 显示用户ID的后8位
@@ -97,106 +109,152 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
         <h3 className="text-lg font-semibold">社交网络分析</h3>
       </div>
 
-      {/* 紧凑的网络概览统计 */}
-      <div className="p-4 rounded-lg border bg-muted/30">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">总用户数</div>
-              <div className="font-semibold">{socialNetworkData.total_users.toLocaleString()}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">总交互数</div>
-              <div className="font-semibold">{socialNetworkData.total_interactions.toLocaleString()}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Network className="h-4 w-4 text-purple-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">网络密度</div>
-              <div className="font-semibold">{socialNetworkData.network_structure.density.toFixed(4)}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Crown className="h-4 w-4 text-orange-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">社区数量</div>
-              <div className="font-semibold">{socialNetworkData.communities.num_communities}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <AtSign className="h-4 w-4 text-pink-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">总@艾特数</div>
-              <div className="font-semibold">{mentionNetwork.total_mentions.toLocaleString()}</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-cyan-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <div className="text-xs text-muted-foreground">@艾特互动率</div>
-              <div className="font-semibold">{(mentionNetwork.mention_patterns.mention_reciprocity_rate * 100).toFixed(1)}%</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 关键人物信息 */}
-        <div className="mt-3 pt-3 border-t border-border/50">
-          <div className="text-xs text-muted-foreground mb-2">关键人物</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Crown className="h-3 w-3 text-yellow-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="font-medium truncate">{socialNetworkData.key_players.most_influential.user_name}</div>
-                <div className="text-xs text-muted-foreground">影响力 {socialNetworkData.key_players.most_influential.score.toFixed(3)}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-3 w-3 text-blue-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="font-medium truncate">{socialNetworkData.key_players.most_popular.user_name}</div>
-                <div className="text-xs text-muted-foreground">受欢迎度 {socialNetworkData.key_players.most_popular.score.toFixed(3)}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Network className="h-3 w-3 text-green-500 flex-shrink-0" />
-              <div className="min-w-0">
-                <div className="font-medium truncate">{socialNetworkData.key_players.bridge_player.user_name}</div>
-                <div className="text-xs text-muted-foreground">桥梁作用 {socialNetworkData.key_players.bridge_player.score.toFixed(3)}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 紧凑的图表网格 */}
+      {/* 图表网格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {/* 中心性指标 - 紧凑版 */}
+        {/* 网络概览统计 - 作为第一个图表项 */}
         <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
-          <h4 className="font-medium mb-3 text-sm">用户中心性指标 (Top 8)</h4>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
-            <BarChart data={centralityData.slice(0, 8)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" fontSize={12} />
-              <YAxis dataKey="name" type="category" width={60} fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `用户: ${value}`}
-                formatter={(value) => [typeof value === 'number' ? value.toFixed(4) : value, 'PageRank分数']}
-              />
-              <Bar dataKey="pagerank" fill="var(--chart-1)" radius={2} />
-            </BarChart>
-          </ChartContainer>
+          <h4 className="font-medium mb-4 text-sm">网络概览统计</h4>
+
+          {/* 基础网络统计 */}
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                <span className="text-sm">总用户数</span>
+              </div>
+              <span className="font-semibold">{socialNetworkData.total_users.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                <span className="text-sm">总交互数</span>
+              </div>
+              <span className="font-semibold">{socialNetworkData.total_interactions.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Network className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                <span className="text-sm">网络密度</span>
+              </div>
+              <span className="font-semibold">{socialNetworkData.network_structure.density.toFixed(4)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                <span className="text-sm">社区数量</span>
+              </div>
+              <span className="font-semibold">{socialNetworkData.communities.num_communities}</span>
+            </div>
+          </div>
+
+          {/* 分割线 */}
+          <div className="border-t border-border/50 my-3"></div>
+
+          {/* @艾特网络统计 */}
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AtSign className="h-4 w-4 text-pink-500 flex-shrink-0" />
+                <span className="text-sm">总@艾特数</span>
+              </div>
+              <span className="font-semibold">{mentionNetwork.total_mentions.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-cyan-500 flex-shrink-0" />
+                <span className="text-sm">@艾特互动率</span>
+              </div>
+              <span className="font-semibold">{(mentionNetwork.mention_patterns.mention_reciprocity_rate * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+
+          {/* 分割线 */}
+          <div className="border-t border-border/50 my-3"></div>
+
+          {/* 关键人物信息 */}
+          <div>
+            <div className="text-xs text-muted-foreground mb-3">关键人物</div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Crown className="h-3 w-3 text-yellow-500 flex-shrink-0" />
+                  <span className="text-xs">最具影响力</span>
+                </div>
+                <span className="text-xs font-medium truncate max-w-[100px]">{socialNetworkData.key_players.most_influential.user_name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                  <span className="text-xs">最受欢迎</span>
+                </div>
+                <span className="text-xs font-medium truncate max-w-[100px]">{socialNetworkData.key_players.most_popular.user_name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Network className="h-3 w-3 text-green-500 flex-shrink-0" />
+                  <span className="text-xs">桥梁作用</span>
+                </div>
+                <span className="text-xs font-medium truncate max-w-[100px]">{socialNetworkData.key_players.bridge_player.user_name}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* 社区规模分布 - 紧凑版 */}
+        
+        {/* 社区详情面板 */}
+        <div className="xl:col-span-1 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <h4 className="font-medium mb-3 text-sm">社区详情 (Top {Math.min(communityDetails.length, 5)})</h4>
+          <div className="space-y-3 max-h-[350px] overflow-y-auto">
+            {communityDetails.slice(0, 5).map((community) => (
+              <div key={community.id} className="p-3 rounded-md bg-muted/30 border border-border/50">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                    <span className="font-medium text-sm">{community.name}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{community.size} 人</span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">最活跃成员:</span>
+                    <span className="text-xs font-medium truncate max-w-[100px]">
+                      {community.topMember.user_name}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">消息数:</span>
+                    <span className="text-xs font-medium">
+                      {community.topMember.message_count}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 成员列表预览 */}
+                <div className="mt-2 pt-2 border-t border-border/30">
+                  <div className="text-xs text-muted-foreground mb-1">成员预览:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {community.members.slice(0, 3).map((member, idx) => (
+                      <span key={idx} className="text-xs bg-background/50 px-1.5 py-0.5 rounded truncate">
+                        {member.user_name}
+                      </span>
+                    ))}
+                    {community.totalMembers > 3 && (
+                      <span className="text-xs text-muted-foreground">
+                        +{community.totalMembers - 3}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 社区规模分布 - 增加高度 */}
         <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
           <h4 className="font-medium mb-3 text-sm">社区规模分布</h4>
-          <ChartContainer config={chartConfig} className="h-[200px] w-full">
+          <ChartContainer config={chartConfig} className="h-[350px] w-full">
             <BarChart data={communityData}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="community" fontSize={12} />
@@ -210,10 +268,10 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
           </ChartContainer>
         </div>
 
-        {/* 最活跃用户 - 跨列显示 */}
-        <div className="md:col-span-2 xl:col-span-3 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+        {/* 最活跃用户 */}
+        <div className="md:col-span-2 xl:col-span-2 p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
           <h4 className="font-medium mb-3 text-sm">最活跃用户 (Top 10)</h4>
-          <ChartContainer config={chartConfig} className="h-[180px] w-full">
+          <ChartContainer config={chartConfig} className="h-[220px] w-full">
             <BarChart data={topUsersData}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="user" fontSize={12} />
@@ -230,6 +288,25 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
             </BarChart>
           </ChartContainer>
         </div>
+
+        {/* 中心性指标 - 增加高度 */}
+        <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
+          <h4 className="font-medium mb-3 text-sm">用户中心性指标 (Top 8)</h4>
+          <ChartContainer config={chartConfig} className="h-[220px] w-full">
+            <BarChart data={centralityData.slice(0, 8)} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" fontSize={12} />
+              <YAxis dataKey="name" type="category" width={60} fontSize={12} />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                labelFormatter={(value) => `用户: ${value}`}
+                formatter={(value) => [typeof value === 'number' ? value.toFixed(4) : value, 'PageRank分数']}
+              />
+              <Bar dataKey="pagerank" fill="var(--chart-1)" radius={2} />
+            </BarChart>
+          </ChartContainer>
+        </div>
+
       </div>
 
       {/* @艾特网络分析部分 */}
@@ -279,7 +356,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
             {/* 最常被@艾特用户 */}
             <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
               <h5 className="font-medium mb-3 text-sm">最常被@艾特用户 (Top 8)</h5>
-              <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
                 <BarChart data={topMentionedData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" fontSize={12} />
@@ -297,7 +374,7 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
             {/* 最爱@艾特别人的用户 */}
             <div className="p-4 rounded-lg border bg-gradient-to-br from-background to-muted/20">
               <h5 className="font-medium mb-3 text-sm">最爱@艾特别人的用户 (Top 8)</h5>
-              <ChartContainer config={chartConfig} className="h-[200px] w-full">
+              <ChartContainer config={chartConfig} className="h-[280px] w-full">
                 <BarChart data={topMentionersData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" fontSize={12} />
