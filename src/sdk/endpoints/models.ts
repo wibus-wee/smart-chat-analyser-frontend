@@ -1,6 +1,7 @@
 import type { ChatlogAnalyserClient } from '../client';
 import {
   ModelInfoResponseSchema,
+  EnhancedModelInfoResponseSchema,
   ClearModelRequestSchema,
   ClearModelResponseSchema,
   PreloadModelRequestSchema,
@@ -8,7 +9,10 @@ import {
   PreloadStatusResponseSchema,
   CancelPreloadRequestSchema,
   CancelPreloadResponseSchema,
+  ModelOperationRequestSchema,
+  ModelOperationResponseSchema,
   type ModelInfoResponse,
+  type EnhancedModelInfoResponse,
   type ClearModelRequest,
   type ClearModelResponse,
   type PreloadModelRequest,
@@ -16,6 +20,8 @@ import {
   type PreloadStatusResponse,
   type CancelPreloadRequest,
   type CancelPreloadResponse,
+  type ModelOperationRequest,
+  type ModelOperationResponse,
 } from '../types';
 import { validateRequest, validateResponse } from '../utils/validation';
 
@@ -190,6 +196,97 @@ export class ModelsApi {
       return false;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * 获取增强的模型信息（包含详细状态）
+   * @returns 增强的模型信息响应
+   */
+  async getEnhancedModelInfo(): Promise<EnhancedModelInfoResponse> {
+    const response = await this.client.get<EnhancedModelInfoResponse>('/models/info');
+    return validateResponse(response.data, EnhancedModelInfoResponseSchema, 'getEnhancedModelInfo');
+  }
+
+  /**
+   * 执行模型操作（清除/预加载）
+   * @param operation 操作类型
+   * @param modelKey 可选的模型键名
+   * @param force 是否强制执行
+   * @returns 操作响应
+   */
+  async executeModelOperation(
+    operation: 'clear' | 'preload',
+    modelKey?: string,
+    force?: boolean
+  ): Promise<ModelOperationResponse> {
+    const request: ModelOperationRequest = {
+      force: force ?? false,
+    };
+    if (modelKey) request.model_key = modelKey;
+
+    const validatedRequest = validateRequest(request, ModelOperationRequestSchema, 'executeModelOperation');
+
+    const endpoint = operation === 'clear' ? '/models/clear' : '/models/preload';
+    const response = await this.client.post<ModelOperationResponse>(endpoint, validatedRequest);
+    return validateResponse(response.data, ModelOperationResponseSchema, 'executeModelOperation');
+  }
+
+  /**
+   * 获取模型详细状态信息
+   * @returns 模型状态详情
+   */
+  async getModelStatusDetails(): Promise<{
+    totalModels: number;
+    loadedModels: number;
+    totalMemory: number;
+    modelDetails: Record<string, {
+      status: string;
+      loadTime: number | null;
+      memoryUsage: number | null;
+      lastUsed: string | null;
+      error: string | null;
+    }>;
+  }> {
+    try {
+      const enhancedInfo = await this.getEnhancedModelInfo();
+      return {
+        totalModels: enhancedInfo.total_models,
+        loadedModels: enhancedInfo.loaded_models,
+        totalMemory: enhancedInfo.total_memory,
+        modelDetails: Object.fromEntries(
+          Object.entries(enhancedInfo.models).map(([key, model]) => [
+            key,
+            {
+              status: model.status,
+              loadTime: model.load_time,
+              memoryUsage: model.memory_usage,
+              lastUsed: model.last_used,
+              error: model.error,
+            },
+          ])
+        ),
+      };
+    } catch {
+      // 如果增强API不可用，回退到基础API
+      const basicInfo = await this.getModelInfo();
+      return {
+        totalModels: basicInfo.model_count,
+        loadedModels: basicInfo.model_count,
+        totalMemory: 0,
+        modelDetails: Object.fromEntries(
+          basicInfo.loaded_models.map(model => [
+            model,
+            {
+              status: 'loaded',
+              loadTime: null,
+              memoryUsage: null,
+              lastUsed: null,
+              error: null,
+            },
+          ])
+        ),
+      };
     }
   }
 }

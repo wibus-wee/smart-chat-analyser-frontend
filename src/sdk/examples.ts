@@ -1,4 +1,4 @@
-import { ChatlogAnalyserSDK } from './index';
+import ChatlogAnalyserSDK from './index';
 
 /**
  * SDK 使用示例
@@ -16,7 +16,7 @@ const sdk = new ChatlogAnalyserSDK({
 export async function exampleHealthCheck() {
   try {
     // 简单检查
-    const isHealthy = await sdk.isHealthy();
+    const isHealthy = await sdk.health.isHealthy();
     console.log('Service is healthy:', isHealthy);
 
     // 详细健康信息
@@ -97,21 +97,24 @@ export async function exampleWaitForResult(taskId: string) {
 export async function exampleFullAnalysis() {
   try {
     // 1. 检查服务健康状态
-    const isHealthy = await sdk.isHealthy();
+    const isHealthy = await sdk.health.isHealthy();
     if (!isHealthy) {
       throw new Error('Service is not healthy');
     }
 
     // 2. 获取可用分析器
-    const analyzers = await sdk.analyzers.getAvailableAnalyzers();
+    const analyzers = await sdk.analyzers.getAnalyzers();
     console.log('Available analyzers:', analyzers);
 
-    // 3. 提交任务并等待完成
-    const result = await sdk.analyzeAndWait({
+    // 3. 提交任务
+    const taskResponse = await sdk.tasks.createTask({
       talker: 'friend_name',
       days: 7,
       analyzers: ['word_frequency', 'sentiment'],
     });
+
+    // 4. 等待任务完成
+    const result = await sdk.tasks.waitForTaskCompletion(taskResponse.task_id);
 
     console.log('Analysis completed:', result);
     return result;
@@ -185,7 +188,7 @@ export async function exampleModelManagement() {
  */
 export async function exampleSystemOverview() {
   try {
-    const overview = await sdk.getSystemOverview();
+    const overview = await sdk.system.getFullSystemStatus();
     console.log('System overview:', overview);
 
   } catch (error) {

@@ -199,7 +199,7 @@ export function StatusBar() {
                 </div>
               )}
 
-              {(overview?.models || overviewLoading || modelsWithStatus.length > 0) && (
+              {(overviewLoading || modelsWithStatus.length > 0) && (
                 <div className="space-y-3 pt-2 border-t">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -212,19 +212,7 @@ export function StatusBar() {
                     </div>
                   </div>
 
-                  {/* 系统概览 */}
-                  {overview?.models && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">已加载模型</span>
-                        <span className="font-medium">{overview.models.model_count} 个</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">RSS 内存</span>
-                        <span className="font-medium">{overview.models.memory_usage?.rss || 'N/A'}</span>
-                      </div>
-                    </div>
-                  )}
+
 
                   {/* 批量操作 */}
                   <div className="flex gap-1">

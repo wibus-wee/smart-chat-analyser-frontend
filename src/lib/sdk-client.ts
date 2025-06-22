@@ -1,7 +1,7 @@
-import { ChatlogAnalyserSDK } from '../sdk';
+import { SDK } from '../sdk';
 
-// 创建 SDK 客户端实例
-export const sdkClient = new ChatlogAnalyserSDK({
+// 创建完整的 SDK 客户端实例
+export const sdkClient = new SDK({
   baseUrl: 'http://localhost:6142/api/v1',
   timeout: 30000,
 });

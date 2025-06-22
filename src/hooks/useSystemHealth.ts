@@ -26,7 +26,7 @@ export function useSystemHealth() {
 export function useSystemOverview() {
   const { data, error, isLoading, mutate } = useSWR(
     'system-overview',
-    () => sdkClient.getSystemOverview(),
+    () => sdkClient.system.getFullSystemStatus(),
     {
       refreshInterval: 60000, // 每分钟刷新一次
       revalidateOnFocus: true,
