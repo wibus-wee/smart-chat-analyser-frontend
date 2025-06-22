@@ -13,15 +13,9 @@ import { Button } from '../../ui/button';
 import { Loader2, ZoomIn, ZoomOut, RotateCcw, Play, Pause } from 'lucide-react';
 import { useAsyncChart, useDataSampling } from '../../../hooks/useAsyncChart';
 
-interface TimeSeriesDataPoint {
-  time: string;
-  sentiment: number;
-  confidence: number;
-}
-
 interface LazyTimeSeriesChartProps {
   timeSeriesData: {
-    x: string[];
+    x: number[];
     sentiment: number[];
     confidence: number[];
   };
@@ -34,7 +28,7 @@ export default function LazyTimeSeriesChart({ timeSeriesData, chartConfig }: Laz
   // 处理原始数据
   const rawData = useMemo(() => {
     return timeSeriesData.x.map((x, index) => ({
-      time: x,
+      time: String(x),
       sentiment: timeSeriesData.sentiment[index],
       confidence: timeSeriesData.confidence[index]
     }));
