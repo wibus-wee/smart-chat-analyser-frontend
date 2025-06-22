@@ -23,7 +23,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useTaskList, useAnalysisTask } from '../../hooks/useAnalysisTask';
-import type { TaskStatus, TaskListItem } from '../../sdk';
+import type { TaskStatus, TaskInfo } from '../../sdk';
 
 interface TaskListProps {
   onTaskSelect?: (taskId: string) => void;
@@ -242,7 +242,7 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
 }
 
 interface TaskListItemProps {
-  task: TaskListItem;
+  task: TaskInfo;
   index: number;
   onSelect: () => void;
   onCancel: () => void;
@@ -282,10 +282,10 @@ function TaskListItem({
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {task.message.slice(0,55)}...
+              {task.message ? task.message.slice(0,55) + '...' : '暂无描述'}
             </p>
             <p className="text-xs text-muted-foreground">
-              创建时间: {formatDate(task.created_at)}
+              创建时间: {task.created_at ? formatDate(task.created_at) : '未知'}
             </p>
           </div>
         </div>

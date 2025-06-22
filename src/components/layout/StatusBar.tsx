@@ -38,8 +38,6 @@ export function StatusBar() {
   console.log(overview?.analyzers);
   const {
     modelsWithStatus,
-    modelInfo,
-    preloadStatus: modelPreloadStatus,
     isLoading: modelManagementLoading,
     isOperating,
     preloadModel,
@@ -47,18 +45,7 @@ export function StatusBar() {
     clearModelCache,
     preloadAllModels,
     clearAllModelCache,
-    error: modelError,
   } = useModelManagement();
-
-  // 调试信息
-  console.log('模型管理调试信息:', {
-    modelInfo,
-    modelPreloadStatus,
-    modelsWithStatus,
-    modelManagementLoading,
-    modelError,
-    overviewLoading
-  });
 
   // 用户缓存管理
   const {
@@ -181,7 +168,7 @@ export function StatusBar() {
               <span className="text-sm">{getStatusText()}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 max-h-[95vh] overflow-scroll" align="end">
+          <PopoverContent className="w-80 max-h-[95vh] overflow-y-auto " align="end">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4" />

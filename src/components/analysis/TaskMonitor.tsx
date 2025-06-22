@@ -46,6 +46,18 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
   // WebSocket 实时监控
   const { progress: wsProgress, completed: wsCompleted, isSubscribed } = useTaskMonitor(taskId);
 
+  // 调试日志
+  useEffect(() => {
+    console.log('TaskMonitor Debug:', {
+      taskId,
+      wsProgress,
+      wsCompleted,
+      isSubscribed,
+      taskStatus,
+      wsConnected,
+    });
+  }, [taskId, wsProgress, wsCompleted, isSubscribed, taskStatus, wsConnected]);
+
   // 使用 WebSocket 数据或 API 数据
   const currentStatus = wsProgress?.status || taskStatus?.status || 'pending';
   const currentProgress = wsProgress?.progress ?? taskStatus?.progress ?? 0;

@@ -69,15 +69,22 @@ export function useTaskMonitor(taskId: string | null) {
 
   // 订阅任务
   const subscribe = useCallback(() => {
-    if (!taskId || !websocketManager.isConnected) return;
+    if (!taskId || !websocketManager.isConnected) {
+      console.log('无法订阅任务:', { taskId, connected: websocketManager.isConnected });
+      return;
+    }
+
+    console.log('开始订阅任务:', taskId);
 
     // 设置进度监听器
     websocketManager.onTaskProgress(taskId, (event) => {
+      console.log('useTaskMonitor 收到进度更新:', event);
       setProgress(event);
     });
 
     // 设置完成监听器
     websocketManager.onTaskCompleted(taskId, (event) => {
+      console.log('useTaskMonitor 收到完成通知:', event);
       setCompleted(event);
       setIsSubscribed(false);
     });
@@ -86,6 +93,7 @@ export function useTaskMonitor(taskId: string | null) {
     websocketManager.subscribeToTask(taskId);
     setIsSubscribed(true);
     taskIdRef.current = taskId;
+    console.log('任务订阅完成:', taskId);
   }, [taskId]);
 
   // 取消订阅任务

@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import { TaskStatusSchema, PaginationInfoSchema } from './common';
+import { ResultSchema } from './task-response';
 
 // 任务数据 - 匹配 OpenAPI TaskData
 export const TaskDataSchema = z.object({
   talker: z.string().optional().describe('分析的用户名'),
   limit: z.number().int().optional().describe('分析消息数量限制'),
   chatroom_id: z.string().optional().describe('聊天室ID'),
+  days: z.number().int().optional().describe('分析天数'),
+  analyzers: z.array(z.string()).optional().describe('使用的分析器列表'),
 });
 export type TaskData = z.infer<typeof TaskDataSchema>;
 
@@ -29,19 +32,19 @@ export type TaskSubmitResponse = z.infer<typeof TaskSubmitResponseSchema>;
 // 任务信息 - 匹配 OpenAPI TaskInfo
 export const TaskInfoSchema = z.object({
   task_id: z.string().describe('任务ID'),
-  task_type: z.string().describe('任务类型'),
+  task_type: z.string().optional().describe('任务类型'),
   status: TaskStatusSchema.describe('任务状态'),
-  progress: z.number().min(0).max(1).optional().describe('任务进度 (0-1)'),
+  progress: z.number().min(0).max(100).optional().describe('任务进度 (0-100)'),
   message: z.string().optional().describe('任务消息'),
   created_at: z.string().optional().describe('创建时间'),
-  started_at: z.string().optional().describe('开始时间'),
-  completed_at: z.string().optional().describe('完成时间'),
+  started_at: z.string().nullable().optional().describe('开始时间'),
+  completed_at: z.string().nullable().optional().describe('完成时间'),
 });
 export type TaskInfo = z.infer<typeof TaskInfoSchema>;
 
 // 任务过滤器 - 匹配 OpenAPI TaskFilters
 export const TaskFiltersSchema = z.object({
-  status: z.string().optional().describe('状态过滤器'),
+  status: z.string().nullable().optional().describe('状态过滤器'),
 });
 export type TaskFilters = z.infer<typeof TaskFiltersSchema>;
 
@@ -58,8 +61,8 @@ export type TasksListResponse = z.infer<typeof TasksListResponseSchema>;
 export const TaskResultResponseSchema = z.object({
   task_id: z.string().describe('任务ID'),
   status: z.string().describe('任务状态'),
-  result: z.object({}).optional().describe('任务结果数据'),
-  completed_at: z.string().optional().describe('完成时间'),
+  result: ResultSchema.optional().describe('任务结果数据'),
+  completed_at: z.string().nullable().optional().describe('完成时间'),
 });
 export type TaskResultResponse = z.infer<typeof TaskResultResponseSchema>;
 
@@ -78,3 +81,19 @@ export const TaskListQuerySchema = z.object({
   status: TaskStatusSchema.optional().describe('状态过滤器'),
 });
 export type TaskListQuery = z.infer<typeof TaskListQuerySchema>;
+
+// 分析器类型
+export type AnalyzerType = string;
+
+// 任务列表项 - 基于 TaskInfo 但确保 progress 和其他字段的类型
+export const TaskListItemSchema = z.object({
+  task_id: z.string().describe('任务ID'),
+  task_type: z.string().describe('任务类型'),
+  status: TaskStatusSchema.describe('任务状态'),
+  progress: z.number().min(0).max(100).default(0).describe('任务进度 (0-100)'),
+  message: z.string().default('').describe('任务消息'),
+  created_at: z.string().describe('创建时间'),
+  started_at: z.string().nullable().optional().describe('开始时间'),
+  completed_at: z.string().nullable().optional().describe('完成时间'),
+});
+export type TaskListItem = z.infer<typeof TaskListItemSchema>;

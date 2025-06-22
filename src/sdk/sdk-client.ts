@@ -9,9 +9,7 @@ import { PreloadApi } from './endpoints/preload';
 import type {
   ApiClientConfig,
   HealthResponse,
-  QueueStatsResponse,
   AnalyzersResponse,
-  ModelInfo,
 } from './types';
 
 /**

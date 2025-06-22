@@ -30,8 +30,14 @@ export class TasksApi {
    * @param query 查询参数
    * @returns 任务列表响应
    */
-  async getTaskList(query: TaskListQuery = {}): Promise<TasksListResponse> {
-    const validatedQuery = validateRequest(query, TaskListQuerySchema, 'getTaskList');
+  async getTaskList(query: TaskListQuery = { offset: 0, limit: 20 }): Promise<TasksListResponse> {
+    // 应用默认值
+    const queryWithDefaults = {
+      ...query,
+      offset: query.offset ?? 0,
+      limit: query.limit ?? 20,
+    };
+    const validatedQuery = validateRequest(queryWithDefaults, TaskListQuerySchema, 'getTaskList');
     const response = await this.client.get<TasksListResponse>('/tasks', { query: validatedQuery });
     return validateResponse(response.data, TasksListResponseSchema, 'getTaskList');
   }
@@ -182,6 +188,6 @@ export class TasksApi {
    */
   async getTaskProgress(taskId: string): Promise<number> {
     const status = await this.getTaskStatus(taskId);
-    return status.progress;
+    return status.progress ?? 0;
   }
 }

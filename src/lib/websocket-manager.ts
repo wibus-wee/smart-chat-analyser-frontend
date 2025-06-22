@@ -83,24 +83,56 @@ export class WebSocketManager {
         this.notifyConnectionListeners(false);
       });
 
-      // 任务进度更新
-      this.socket.on('task_progress', (data: TaskProgressEvent) => {
-        console.log('收到任务进度更新:', data);
-        const listener = this.progressListeners.get(data.task_id);
-        if (listener) {
-          listener(data);
-        }
-      });
+      // 任务更新通知（统一处理进度和完成事件）
+      this.socket.on('task_update', (data: any) => {
+        console.log('收到任务更新:', data);
 
-      // 任务完成通知
-      this.socket.on('task_completed', (data: TaskCompletedEvent) => {
-        console.log('收到任务完成通知:', data);
-        const listener = this.completedListeners.get(data.task_id);
-        if (listener) {
-          listener(data);
+        if (data.type === 'progress') {
+          // 处理进度更新
+          const progressData: TaskProgressEvent = {
+            task_id: data.task_id,
+            status: data.status || 'running',
+            progress: data.progress || 0,
+            message: data.message || '',
+            timestamp: data.timestamp || new Date().toISOString(),
+          };
+
+          console.log('处理进度更新:', progressData);
+          const listener = this.progressListeners.get(data.task_id);
+          console.log('进度监听器存在:', !!listener, '任务ID:', data.task_id);
+          if (listener) {
+            listener(progressData);
+          }
+        } else if (data.type === 'completion') {
+          // 处理完成通知
+          const completedData: TaskCompletedEvent = {
+            task_id: data.task_id,
+            status: data.status || 'completed',
+            message: data.message || '',
+            timestamp: data.timestamp || new Date().toISOString(),
+          };
+
+          const listener = this.completedListeners.get(data.task_id);
+          if (listener) {
+            listener(completedData);
+          }
+          // 任务完成后自动取消订阅
+          this.unsubscribeFromTask(data.task_id);
+        } else if (data.type === 'status') {
+          // 处理状态更新（初始状态或状态变化）
+          const progressData: TaskProgressEvent = {
+            task_id: data.task_id,
+            status: data.status || 'pending',
+            progress: data.progress || 0,
+            message: data.message || '',
+            timestamp: data.timestamp || new Date().toISOString(),
+          };
+
+          const listener = this.progressListeners.get(data.task_id);
+          if (listener) {
+            listener(progressData);
+          }
         }
-        // 任务完成后自动取消订阅
-        this.unsubscribeFromTask(data.task_id);
       });
 
       // 重连事件

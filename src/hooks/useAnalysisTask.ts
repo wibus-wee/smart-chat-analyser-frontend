@@ -85,7 +85,7 @@ export function useTaskResult(taskId: string | null) {
   };
 }
 
-export function useTaskList(query: TaskListQuery = {}) {
+export function useTaskList(query: TaskListQuery = { offset: 0, limit: 20 }) {
   const { data, error, isLoading, mutate } = useSWR(
     ['task-list', query],
     ([, query]) => sdkClient.tasks.getTaskList(query),

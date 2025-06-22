@@ -40,7 +40,7 @@ export class HealthApi {
   ): Promise<boolean> {
     try {
       const health = await this.getHealth();
-      return health.services[serviceName] === true;
+      return health.services?.[serviceName] === true;
     } catch {
       return false;
     }
@@ -53,6 +53,9 @@ export class HealthApi {
   async getUnavailableServices(): Promise<string[]> {
     try {
       const health = await this.getHealth();
+      if (!health.services) {
+        return [];
+      }
       return Object.entries(health.services)
         .filter(([, available]) => !available)
         .map(([serviceName]) => serviceName);
