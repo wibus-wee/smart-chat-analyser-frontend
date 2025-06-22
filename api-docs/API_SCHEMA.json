@@ -1,0 +1,406 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "聊天记录分析器 API",
+    "version": "1.0.0",
+    "description": "聊天记录分析器的REST API接口文档"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:6142/api/v1",
+      "description": "本地开发服务器"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "健康检查",
+        "responses": {
+          "200": {
+            "description": "服务健康",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {"type": "string", "example": "healthy"},
+                    "timestamp": {"type": "string", "format": "date-time"},
+                    "version": {"type": "string", "example": "1.0.0"},
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "task_queue": {"type": "boolean"},
+                        "model_manager": {"type": "boolean"},
+                        "preprocessing_service": {"type": "boolean"},
+                        "analysis_service": {"type": "boolean"},
+                        "visualization_service": {"type": "boolean"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "post": {
+        "summary": "提交分析任务",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task_type": {
+                    "type": "string",
+                    "enum": ["chatlog_analysis"],
+                    "default": "chatlog_analysis"
+                  },
+                  "task_data": {
+                    "type": "object",
+                    "properties": {
+                      "talker": {"type": "string", "description": "聊天对象标识"},
+                      "days": {"type": "integer", "default": 30, "description": "分析天数"},
+                      "limit": {"type": "integer", "description": "记录数量限制"},
+                      "analyzers": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": ["word_frequency", "sentiment", "time_pattern", "social_network"]
+                        },
+                        "description": "分析器列表"
+                      }
+                    },
+                    "anyOf": [
+                      {"required": ["talker"]},
+                      {"required": ["limit"]}
+                    ]
+                  }
+                },
+                "required": ["task_data"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "任务提交成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": {"type": "string"},
+                    "status": {"type": "string", "example": "submitted"},
+                    "message": {"type": "string"},
+                    "task_type": {"type": "string"},
+                    "submitted_at": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task_id}": {
+      "get": {
+        "summary": "获取任务状态",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务状态信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": {"type": "string"},
+                    "status": {
+                      "type": "string",
+                      "enum": ["pending", "running", "completed", "failed", "cancelled"]
+                    },
+                    "progress": {"type": "integer", "minimum": 0, "maximum": 100},
+                    "message": {"type": "string"},
+                    "submitted_at": {"type": "string", "format": "date-time"},
+                    "started_at": {"type": "string", "format": "date-time"},
+                    "completed_at": {"type": "string", "format": "date-time"},
+                    "task_type": {"type": "string"},
+                    "task_data": {"type": "object"}
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "任务不存在"
+          }
+        }
+      }
+    },
+    "/tasks/{task_id}/result": {
+      "get": {
+        "summary": "获取任务结果",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": {"type": "string"},
+                    "status": {"type": "string", "example": "completed"},
+                    "result": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "chart_data": {"type": "object"},
+                          "summary": {"type": "object"}
+                        }
+                      }
+                    },
+                    "completed_at": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "任务尚未完成"
+          },
+          "404": {
+            "description": "任务不存在"
+          }
+        }
+      }
+    },
+    "/tasks/{task_id}/cancel": {
+      "post": {
+        "summary": "取消任务",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"},
+            "description": "任务ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "任务取消成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "task_id": {"type": "string"},
+                    "status": {"type": "string", "example": "cancelled"},
+                    "message": {"type": "string"}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "任务无法取消"
+          },
+          "404": {
+            "description": "任务不存在"
+          }
+        }
+      }
+    },
+    "/analyzers": {
+      "get": {
+        "summary": "获取可用分析器列表",
+        "responses": {
+          "200": {
+            "description": "分析器列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "analyzers": {
+                      "type": "array",
+                      "items": {"type": "string"}
+                    },
+                    "analyzer_info": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "name": {"type": "string"},
+                          "description": {"type": "string"},
+                          "version": {"type": "string"}
+                        }
+                      }
+                    },
+                    "total_count": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analyzers/{analyzer_name}": {
+      "get": {
+        "summary": "获取特定分析器信息",
+        "parameters": [
+          {
+            "name": "analyzer_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["word_frequency", "sentiment", "time_pattern", "social_network"]
+            },
+            "description": "分析器名称"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "分析器详细信息"
+          },
+          "404": {
+            "description": "分析器不存在"
+          }
+        }
+      }
+    },
+    "/models/info": {
+      "get": {
+        "summary": "获取模型信息",
+        "responses": {
+          "200": {
+            "description": "模型信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "loaded_models": {
+                      "type": "array",
+                      "items": {"type": "string"}
+                    },
+                    "memory_usage": {
+                      "type": "object",
+                      "properties": {
+                        "rss": {"type": "string"},
+                        "vms": {"type": "string"}
+                      }
+                    },
+                    "model_count": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/models/clear": {
+      "post": {
+        "summary": "清除模型缓存",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model_key": {"type": "string", "description": "要清除的模型键名，不提供则清除全部"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "清除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {"type": "string"},
+                    "timestamp": {"type": "string", "format": "date-time"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/system/stats": {
+      "get": {
+        "summary": "获取系统统计信息",
+        "responses": {
+          "200": {
+            "description": "系统统计信息"
+          }
+        }
+      }
+    },
+    "/queue/stats": {
+      "get": {
+        "summary": "获取队列统计信息",
+        "responses": {
+          "200": {
+            "description": "队列统计信息"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TaskStatus": {
+        "type": "string",
+        "enum": ["pending", "running", "completed", "failed", "cancelled"]
+      },
+      "AnalyzerType": {
+        "type": "string",
+        "enum": ["word_frequency", "sentiment", "time_pattern", "social_network"]
+      }
+    }
+  }
+}
