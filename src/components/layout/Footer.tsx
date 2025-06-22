@@ -90,7 +90,7 @@ export function Footer() {
               <Heart className="h-3 w-3 text-red-500" />
               <span>Made with</span>
               <Code className="h-3 w-3" />
-              <span>by Developer</span>
+              <span>by Wibus</span>
             </div>
           </div>
 

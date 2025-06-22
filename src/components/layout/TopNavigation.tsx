@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, useLocation } from '@tanstack/react-router';
-import { Home, BarChart3, History, Settings } from 'lucide-react';
+import { Home, BarChart3 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ThemeToggle } from '../ui/theme-toggle';
 
@@ -14,11 +14,6 @@ const navigationItems = [
     to: '/analysis',
     label: '分析',
     icon: BarChart3,
-  },
-  {
-    to: '/settings',
-    label: '设置',
-    icon: Settings,
   },
 ];
 
