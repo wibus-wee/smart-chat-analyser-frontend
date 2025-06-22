@@ -1,6 +1,6 @@
-# 聊天日志分析器前端
+# Smart Chat Analyser前端
 
-基于 React + TypeScript + Vite 构建的现代化聊天日志分析器前端应用。
+基于 React + TypeScript + Vite 构建的现代化Smart Chat Analyser前端应用。
 
 ## 🚀 功能特性
 

@@ -16,11 +16,6 @@ const navigationItems = [
     icon: BarChart3,
   },
   {
-    to: '/history',
-    label: '历史',
-    icon: History,
-  },
-  {
     to: '/settings',
     label: '设置',
     icon: Settings,

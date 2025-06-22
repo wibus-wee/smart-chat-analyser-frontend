@@ -104,7 +104,7 @@ export function StatusBar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-semibold">聊天日志分析器</h1>
+          <h1 className="text-xl font-semibold">Smart Chat Analyser</h1>
         </div>
       </div>
 
