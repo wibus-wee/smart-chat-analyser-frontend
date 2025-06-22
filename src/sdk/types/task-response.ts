@@ -154,6 +154,20 @@ export const EdgeSchema = z.object({
 });
 export type Edge = z.infer<typeof EdgeSchema>;
 
+export const VisualizationEdgeSchema = z.object({
+    "source": z.string(),
+    "target": z.string(),
+    "weight": z.number(),
+    "interaction_count": z.number(),
+    "width": z.number(),
+    // 新增字段
+    "reply_count": z.number(),
+    "mention_count": z.number(),
+    "mentioned_users": z.array(z.string()),
+    "has_mentions": z.boolean(),
+});
+export type VisualizationEdge = z.infer<typeof VisualizationEdgeSchema>;
+
 export const LayoutSuggestionsSchema = z.object({
     "circular": z.string(),
     "kamada_kawai": z.string(),
@@ -170,6 +184,41 @@ export const NodeSchema = z.object({
     "size": z.number(),
 });
 export type Node = z.infer<typeof NodeSchema>;
+
+export const VisualizationNodeSchema = z.object({
+    "id": z.string(),
+    "in_degree": z.number(),
+    "message_count": z.number(),
+    "name": z.string(),
+    "out_degree": z.number(),
+    "size": z.number(),
+});
+export type VisualizationNode = z.infer<typeof VisualizationNodeSchema>;
+
+export const MentionNetworkSchema = z.object({
+    "has_mentions": z.boolean(),
+    "total_mentions": z.number(),
+    "unique_mentioned_users": z.number(),
+    "top_mentioned_users": z.array(z.tuple([z.string(), z.number()])),
+    "mention_edges": z.array(z.object({
+        "from": z.string(),
+        "to": z.string(),
+        "mentioned_users": z.array(z.string()),
+        "mention_count": z.number(),
+    })),
+    "mention_patterns": z.object({
+        "top_mentioners": z.array(z.tuple([z.string(), z.number()])),
+        "mention_reciprocity_rate": z.number(),
+        "total_mention_relationships": z.number(),
+        "mutual_mention_relationships": z.number(),
+    }),
+    "mention_graph_stats": z.object({
+        "nodes": z.number(),
+        "edges": z.number(),
+        "density": z.number(),
+    }),
+});
+export type MentionNetwork = z.infer<typeof MentionNetworkSchema>;
 
 export const PeriodDistributionSchema = z.object({
     "上午": z.number(),
@@ -394,10 +443,37 @@ export const UserActivitySchema = z.object({
 export type UserActivity = z.infer<typeof UserActivitySchema>;
 
 export const VisualizationDataSchema = z.object({
-    "communities": VisualizationDataCommunitiesSchema,
-    "edges": z.array(EdgeSchema),
-    "layout_suggestions": LayoutSuggestionsSchema,
-    "nodes": z.array(NodeSchema),
+    "nodes": z.array(VisualizationNodeSchema),
+    "edges": z.array(VisualizationEdgeSchema),
+    "communities": z.object({}),
+    // 新增@艾特网络可视化数据
+    "mention_network": z.object({
+        "has_data": z.boolean(),
+        "nodes": z.array(z.object({
+            "id": z.string(),
+            "name": z.string(),
+            "mentioned_count": z.number(),
+            "mentioning_count": z.number(),
+            "size": z.number(),
+            "color": z.string(),
+        })),
+        "edges": z.array(z.object({
+            "source": z.string(),
+            "target": z.string(),
+            "mention_count": z.number(),
+            "mentioned_users": z.array(z.string()),
+            "width": z.number(),
+            "color": z.string(),
+        })),
+        "mention_matrix": z.record(z.number()),
+        "total_mention_edges": z.number(),
+        "total_mention_nodes": z.number(),
+    }),
+    "layout_suggestions": z.object({
+        "spring": z.string(),
+        "circular": z.string(),
+        "kamada_kawai": z.string(),
+    }),
 });
 export type VisualizationData = z.infer<typeof VisualizationDataSchema>;
 
@@ -489,6 +565,7 @@ export const AnalysisResultsSocialNetworkSchema = z.object({
     "total_users": z.number(),
     "user_activity": UserActivitySchema,
     "visualization_data": VisualizationDataSchema,
+    "mention_network": MentionNetworkSchema,  // 新增字段
 });
 export type AnalysisResultsSocialNetwork = z.infer<typeof AnalysisResultsSocialNetworkSchema>;
 
