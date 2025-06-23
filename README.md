@@ -93,17 +93,14 @@ pnpm build
 - [x] 任务状态监控和进度显示
 - [x] 响应式设计和动画效果
 - [x] SDK 集成和数据获取
-
-### 🚧 开发中
-- [ ] 图表组件实现 (使用 Recharts)
-- [ ] 历史记录管理
-- [ ] 设置页面
+- [x] 图表组件实现 (使用 Recharts)
+- [x] 历史记录管理
+- [x] 结果详情展示
+- [x] 主题切换
 - [ ] 错误处理优化
 
 ### 📝 待实现
-- [ ] 结果详情展示
 - [ ] 数据导出功能
-- [ ] 主题切换
 - [ ] 国际化支持
 
 ## 🔧 开发说明
@@ -126,3 +123,9 @@ pnpm build
 ## 📖 API 文档
 
 详细的 SDK 使用说明请参考 [README_SDK.md](./README_SDK.md)。
+
+## Author
+
+Smart Chat Analyser Frontend © Wibus, Released under AGPLv3. Created on Jun 21, 2025
+
+> [Personal Website](http://wibus.ren/) · [Blog](https://blog.wibus.ren/) · GitHub [@wibus-wee](https://github.com/wibus-wee/) · Telegram [@wibus✪](https://t.me/wibus_wee)
