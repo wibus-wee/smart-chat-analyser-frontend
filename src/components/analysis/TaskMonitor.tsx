@@ -39,12 +39,17 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
     taskId,
     { disablePolling: wsConnected }
   );
-  const { taskResult, isLoading: resultLoading, error: resultError } = useTaskResult(
-    taskStatus?.status === 'completed' ? taskId : null
-  );
 
   // WebSocket 实时监控
   const { progress: wsProgress, completed: wsCompleted, isSubscribed } = useTaskMonitor(taskId);
+
+  // 使用 WebSocket 数据或 API 数据来判断是否完成
+  const currentStatus = wsProgress?.status || taskStatus?.status || 'pending';
+  const isCompleted = currentStatus === 'completed' || wsCompleted;
+
+  const { taskResult, isLoading: resultLoading, error: resultError } = useTaskResult(
+    isCompleted ? taskId : null
+  );
 
   // 调试日志
   useEffect(() => {
@@ -55,11 +60,15 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
       isSubscribed,
       taskStatus,
       wsConnected,
+      currentStatus,
+      isCompleted,
+      taskResult: taskResult ? 'loaded' : 'null',
+      resultLoading,
+      resultError: resultError ? resultError.message : null,
     });
-  }, [taskId, wsProgress, wsCompleted, isSubscribed, taskStatus, wsConnected]);
+  }, [taskId, wsProgress, wsCompleted, isSubscribed, taskStatus, wsConnected, currentStatus, isCompleted, taskResult, resultLoading, resultError]);
 
   // 使用 WebSocket 数据或 API 数据
-  const currentStatus = wsProgress?.status || taskStatus?.status || 'pending';
   const currentProgress = wsProgress?.progress ?? taskStatus?.progress ?? 0;
   const currentMessage = wsProgress?.message || taskStatus?.message || '';
 
@@ -277,11 +286,11 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
 
       {/* 分析结果 */}
       <AnimatePresence>
-        {currentStatus === 'completed' && taskResult && taskResult.result && (
+        {isCompleted && taskResult && taskResult.result && (
           <AnalysisResults taskResult={taskResult.result} />
         )}
-        
-        {currentStatus === 'completed' && resultLoading && (
+
+        {isCompleted && resultLoading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -294,8 +303,8 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
             </div>
           </motion.div>
         )}
-        
-        {currentStatus === 'completed' && resultError && (
+
+        {isCompleted && resultError && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
