@@ -37,7 +37,7 @@ function calculateExpandedBounds(originalRect: DOMRect, fullHeight: string, scal
 
   // 解析目标高度
   const desiredHeight = parseHeightValue(fullHeight);
-  const headerFooterHeight = 120; // 标题、按钮、指示器等的高度
+  const headerFooterHeight = 100; // 标题、按钮、指示器等的高度
 
   // 计算目标尺寸
   const targetWidth = Math.min(maxWidth, Math.max(500, originalRect.width * scaleX));
@@ -138,7 +138,7 @@ export function ExpandableChart<T>({
 
             {/* 展开的图表容器 */}
             <motion.div
-              className="fixed z-50 p-4 rounded-lg border bg-background shadow-2xl"
+              className="fixed z-50 p-4 rounded-lg border bg-accent shadow-2xl"
               initial={{
                 opacity: 1,
                 left: chartRect.left,

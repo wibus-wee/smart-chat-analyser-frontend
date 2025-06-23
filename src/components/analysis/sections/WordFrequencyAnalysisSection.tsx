@@ -168,7 +168,7 @@ export function WordFrequencyAnalysisSection({ wordFrequencyData, icon }: WordFr
           title="高频词汇 (Top 10)"
           className="bg-muted/30"
           compactHeight="h-[300px]"
-          fullHeight="h-[450px]"
+          fullHeight="h-[580px]"
           fullData={topWordsData}
           compactLimit={10}
           renderChart={(data, isExpanded) => (
