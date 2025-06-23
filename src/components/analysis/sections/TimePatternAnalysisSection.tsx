@@ -8,12 +8,13 @@ import {
   YAxis, 
   CartesianGrid
 } from 'recharts';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
+import {
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig 
+  type ChartConfig
 } from '../../ui/chart';
+import { ExpandableChart } from '../../ui/expandable-chart';
 import { Clock, TrendingUp, AlertTriangle, Calendar } from 'lucide-react';
 import type { TimePattern } from '../../../sdk/types/task-response';
 
@@ -200,25 +201,32 @@ export function TimePatternAnalysisSection({ timePatternData, icon }: TimePatter
           </div>
         )}
 
-        {/* 每日趋势 - 跨列显示 */}
-        <div className="md:col-span-2 xl:col-span-4 p-4 rounded-lg border bg-muted/50">
-          <h4 className="font-medium mb-3 text-sm">每日活动趋势 (最近30天)</h4>
-          <ChartContainer config={chartConfig} className="h-[160px] w-full">
-            <LineChart data={dailyData.slice(-30)}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" fontSize={12} />
-              <YAxis fontSize={12} />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Line
-                type="monotone"
-                dataKey="count"
-                stroke="var(--chart-1)"
-                strokeWidth={1.5}
-                dot={false}
-              />
-            </LineChart>
-          </ChartContainer>
-        </div>
+        {/* 每日趋势 - 可展开版 */}
+        <ExpandableChart
+          title="每日活动趋势 (最近30天)"
+          className="md:col-span-2 xl:col-span-4 bg-muted/50"
+          compactHeight="h-[160px]"
+          fullHeight="h-[330px]"
+          fullData={dailyData}
+          compactLimit={-30} // 负数表示从末尾开始取
+          renderChart={(data) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <LineChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--chart-1)"
+                  strokeWidth={1.5}
+                  dot={false}
+                />
+              </LineChart>
+            </ChartContainer>
+          )}
+        />
       </div>
     </motion.div>
   );

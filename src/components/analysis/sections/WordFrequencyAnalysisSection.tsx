@@ -1,17 +1,18 @@
 import { motion } from 'framer-motion';
-import { 
-  Bar, 
-  BarChart, 
-  XAxis, 
-  YAxis, 
+import {
+  Bar,
+  BarChart,
+  XAxis,
+  YAxis,
   CartesianGrid
 } from 'recharts';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
+import {
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig 
+  type ChartConfig
 } from '../../ui/chart';
+import { ExpandableChart } from '../../ui/expandable-chart';
 import { MessageSquare, Hash, Type, BookOpen } from 'lucide-react';
 import type { AnalysisResultsWordFrequency } from '../../../sdk/types/task-response';
 
@@ -162,40 +163,64 @@ export function WordFrequencyAnalysisSection({ wordFrequencyData, icon }: WordFr
             </div>
           </div>
         </div>
-        {/* 高频词汇 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-muted/30">
-          <h4 className="font-medium mb-3 text-sm">高频词汇 (Top 10)</h4>
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <BarChart data={topWordsData.slice(0, 10)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" fontSize={12} />
-              <YAxis dataKey="word" type="category" width={50} fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `词汇: ${value}`}
-                formatter={(value) => [value, '频次']}
-              />
-              <Bar dataKey="count" fill="var(--chart-1)" radius={2} />
-            </BarChart>
-          </ChartContainer>
-        </div>
-        {/* 高频短语 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-muted/30">
-          <h4 className="font-medium mb-3 text-sm">高频短语 (Top 10)</h4>
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <BarChart data={topPhrasesData.slice(0, 10)} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" fontSize={12} />
-              <YAxis dataKey="phrase" type="category" width={80} fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `短语: ${value}`}
-                formatter={(value) => [value, '频次']}
-              />
-              <Bar dataKey="count" fill="var(--chart-2)" radius={2} />
-            </BarChart>
-          </ChartContainer>
-        </div>
+        {/* 高频词汇 - 可展开版 */}
+        <ExpandableChart
+          title="高频词汇 (Top 10)"
+          className="bg-muted/30"
+          compactHeight="h-[300px]"
+          fullHeight="h-[450px]"
+          fullData={topWordsData}
+          compactLimit={10}
+          renderChart={(data, isExpanded) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <BarChart data={data} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" fontSize={12} />
+                <YAxis
+                  dataKey="word"
+                  type="category"
+                  width={isExpanded ? 80 : 50}
+                  fontSize={12}
+                />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `词汇: ${value}`}
+                  formatter={(value) => [value, '频次']}
+                />
+                <Bar dataKey="count" fill="var(--chart-1)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        />
+        {/* 高频短语 - 可展开版 */}
+        <ExpandableChart
+          title="高频短语 (Top 10)"
+          className="bg-muted/30"
+          compactHeight="h-[300px]"
+          fullHeight="h-[450px]"
+          fullData={topPhrasesData}
+          compactLimit={10}
+          renderChart={(data, isExpanded) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <BarChart data={data} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" fontSize={12} />
+                <YAxis
+                  dataKey="phrase"
+                  type="category"
+                  width={isExpanded ? 120 : 80}
+                  fontSize={12}
+                />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `短语: ${value}`}
+                  formatter={(value) => [value, '频次']}
+                />
+                <Bar dataKey="count" fill="var(--chart-2)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        />
         {/* 词汇类型分布 - 紧凑版 */}
         <div className="p-4 rounded-lg border bg-muted/30">
           <h4 className="font-medium mb-3 text-sm">词汇类型分布</h4>
@@ -212,38 +237,52 @@ export function WordFrequencyAnalysisSection({ wordFrequencyData, icon }: WordFr
             </BarChart>
           </ChartContainer>
         </div>
-        {/* 高频短词 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-muted/30">
-          <h4 className="font-medium mb-3 text-sm">高频短词 (Top 8)</h4>
-          <ChartContainer config={chartConfig} className="h-[220px] w-full">
-            <BarChart data={shortWordsData.slice(0, 8)}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="word" fontSize={12} />
-              <YAxis fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                formatter={(value) => [value, '频次']}
-              />
-              <Bar dataKey="count" fill="var(--chart-1)" radius={2} />
-            </BarChart>
-          </ChartContainer>
-        </div>
-        {/* 高频长词 - 紧凑版 */}
-        <div className="p-4 rounded-lg border bg-muted/30">
-          <h4 className="font-medium mb-3 text-sm">高频长词 (Top 8)</h4>
-          <ChartContainer config={chartConfig} className="h-[220px] w-full">
-            <BarChart data={longWordsData.slice(0, 8)}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="word" fontSize={12} />
-              <YAxis fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                formatter={(value) => [value, '频次']}
-              />
-              <Bar dataKey="count" fill="var(--chart-2)" radius={2} />
-            </BarChart>
-          </ChartContainer>
-        </div>
+        {/* 高频短词 - 可展开版 */}
+        <ExpandableChart
+          title="高频短词 (Top 8)"
+          className="bg-muted/30"
+          compactHeight="h-[220px]"
+          fullHeight="h-[400px]"
+          fullData={shortWordsData}
+          compactLimit={8}
+          renderChart={(data) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <BarChart data={data}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="word" fontSize={12} />
+                <YAxis fontSize={12} />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  formatter={(value) => [value, '频次']}
+                />
+                <Bar dataKey="count" fill="var(--chart-1)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        />
+        {/* 高频长词 - 可展开版 */}
+        <ExpandableChart
+          title="高频长词 (Top 8)"
+          className="bg-muted/30"
+          compactHeight="h-[220px]"
+          fullHeight="h-[400px]"
+          fullData={longWordsData}
+          compactLimit={8}
+          renderChart={(data) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <BarChart data={data}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="word" fontSize={12} />
+                <YAxis fontSize={12} />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  formatter={(value) => [value, '频次']}
+                />
+                <Bar dataKey="count" fill="var(--chart-2)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        />
       </div>
     </motion.div>
   );

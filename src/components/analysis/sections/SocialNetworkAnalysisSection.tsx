@@ -6,12 +6,13 @@ import {
   YAxis, 
   CartesianGrid
 } from 'recharts';
-import { 
-  ChartContainer, 
-  ChartTooltip, 
+import {
+  ChartContainer,
+  ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig 
+  type ChartConfig
 } from '../../ui/chart';
+import { ExpandableChart } from '../../ui/expandable-chart';
 import { Crown, Users, MessageCircle, Network, AtSign, TrendingUp } from 'lucide-react';
 import type { AnalysisResultsSocialNetwork } from '../../../sdk/types/task-response';
 
@@ -47,24 +48,8 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
     )
   }));
 
-  // 最活跃用户数据
-  const topUsersData = socialNetworkData.user_activity.top_active_users.slice(0, 10).map(([userId, stats]) => ({
-    user: userId.slice(-8), // 显示用户ID的后8位
-    messages: stats.message_count,
-    connections: stats.total_degree
-  }));
-
   // @艾特网络数据
   const mentionNetwork = socialNetworkData.mention_network;
-  const topMentionedData = mentionNetwork.top_mentioned_users.slice(0, 8).map(([user, count]) => ({
-    user: user.slice(-8), // 显示用户ID的后8位
-    mentions: count
-  }));
-
-  const topMentionersData = mentionNetwork.mention_patterns.top_mentioners.slice(0, 8).map(([user, count]) => ({
-    user: user.slice(-8), // 显示用户ID的后8位
-    mentions: count
-  }));
 
   const chartConfig = {
     pagerank: {
@@ -268,26 +253,37 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
           </ChartContainer>
         </div>
 
-        {/* 最活跃用户 */}
-        <div className="md:col-span-2 xl:col-span-2 p-4 rounded-lg border bg-muted/50">
-          <h4 className="font-medium mb-3 text-sm">最活跃用户 (Top 10)</h4>
-          <ChartContainer config={chartConfig} className="h-[220px] w-full">
-            <BarChart data={topUsersData}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="user" fontSize={12} />
-              <YAxis fontSize={12} />
-              <ChartTooltip
-                content={<ChartTooltipContent />}
-                formatter={(value, name) => [
-                  value,
-                  name === 'messages' ? '消息数' : '连接数'
-                ]}
-              />
-              <Bar dataKey="messages" fill="var(--chart-1)" radius={2} />
-              <Bar dataKey="connections" fill="var(--chart-2)" radius={2} />
-            </BarChart>
-          </ChartContainer>
-        </div>
+        {/* 最活跃用户 - 可展开版 */}
+        <ExpandableChart
+          title="最活跃用户 (Top 10)"
+          className="md:col-span-2 xl:col-span-2 bg-muted/50"
+          compactHeight="h-[220px]"
+          fullHeight="h-[350px]"
+          fullData={socialNetworkData.user_activity.top_active_users.map(([userId, stats]) => ({
+            user: userId.slice(-12),
+            messages: stats.message_count,
+            connections: stats.total_degree
+          }))}
+          compactLimit={10}
+          renderChart={(data) => (
+            <ChartContainer config={chartConfig} className="h-full w-full">
+              <BarChart data={data}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="user" fontSize={12} />
+                <YAxis fontSize={12} />
+                <ChartTooltip
+                  content={<ChartTooltipContent />}
+                  formatter={(value, name) => [
+                    value,
+                    name === 'messages' ? '消息数' : '连接数'
+                  ]}
+                />
+                <Bar dataKey="messages" fill="var(--chart-1)" radius={2} />
+                <Bar dataKey="connections" fill="var(--chart-2)" radius={2} />
+              </BarChart>
+            </ChartContainer>
+          )}
+        />
 
         {/* 中心性指标 - 增加高度 */}
         <div className="p-4 rounded-lg border bg-muted/50">
@@ -353,41 +349,71 @@ export function SocialNetworkAnalysisSection({ socialNetworkData, icon }: Social
 
           {/* @艾特网络图表 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* 最常被@艾特用户 */}
-            <div className="p-4 rounded-lg border bg-muted/50">
-              <h5 className="font-medium mb-3 text-sm">最常被@艾特用户 (Top 8)</h5>
-              <ChartContainer config={chartConfig} className="h-[280px] w-full">
-                <BarChart data={topMentionedData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" fontSize={12} />
-                  <YAxis dataKey="user" type="category" width={60} fontSize={12} />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                    labelFormatter={(value) => `用户: ${value}`}
-                    formatter={(value) => [value, '@艾特次数']}
-                  />
-                  <Bar dataKey="mentions" fill="var(--chart-4)" radius={2} />
-                </BarChart>
-              </ChartContainer>
-            </div>
+            {/* 最常被@艾特用户 - 可展开版 */}
+            <ExpandableChart
+              title="最常被@艾特用户 (Top 8)"
+              className="bg-muted/50"
+              compactHeight="h-[280px]"
+              fullHeight="h-[400px]"
+              fullData={mentionNetwork.top_mentioned_users.map(([user, count]) => ({
+                user: user.slice(-12),
+                mentions: count
+              }))}
+              compactLimit={8}
+              renderChart={(data, isExpanded) => (
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <BarChart data={data} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" fontSize={12} />
+                    <YAxis
+                      dataKey="user"
+                      type="category"
+                      width={isExpanded ? 80 : 60}
+                      fontSize={12}
+                    />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                      labelFormatter={(value) => `用户: ${value}`}
+                      formatter={(value) => [value, '@艾特次数']}
+                    />
+                    <Bar dataKey="mentions" fill="var(--chart-4)" radius={2} />
+                  </BarChart>
+                </ChartContainer>
+              )}
+            />
 
-            {/* 最爱@艾特别人的用户 */}
-            <div className="p-4 rounded-lg border bg-muted/50">
-              <h5 className="font-medium mb-3 text-sm">最爱@艾特别人的用户 (Top 8)</h5>
-              <ChartContainer config={chartConfig} className="h-[280px] w-full">
-                <BarChart data={topMentionersData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" fontSize={12} />
-                  <YAxis dataKey="user" type="category" width={60} fontSize={12} />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                    labelFormatter={(value) => `用户: ${value}`}
-                    formatter={(value) => [value, '@艾特次数']}
-                  />
-                  <Bar dataKey="mentions" fill="var(--chart-5)" radius={2} />
-                </BarChart>
-              </ChartContainer>
-            </div>
+            {/* 最爱@艾特别人的用户 - 可展开版 */}
+            <ExpandableChart
+              title="最爱@艾特别人的用户 (Top 8)"
+              className="bg-muted/50"
+              compactHeight="h-[280px]"
+              fullHeight="h-[350px]"
+              fullData={mentionNetwork.mention_patterns.top_mentioners.map(([user, count]) => ({
+                user: user.slice(-12),
+                mentions: count
+              }))}
+              compactLimit={8}
+              renderChart={(data, isExpanded) => (
+                <ChartContainer config={chartConfig} className="h-full w-full">
+                  <BarChart data={data} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" fontSize={12} />
+                    <YAxis
+                      dataKey="user"
+                      type="category"
+                      width={isExpanded ? 80 : 60}
+                      fontSize={12}
+                    />
+                    <ChartTooltip
+                      content={<ChartTooltipContent />}
+                      labelFormatter={(value) => `用户: ${value}`}
+                      formatter={(value) => [value, '@艾特次数']}
+                    />
+                    <Bar dataKey="mentions" fill="var(--chart-5)" radius={2} />
+                  </BarChart>
+                </ChartContainer>
+              )}
+            />
           </div>
         </div>
       )}
