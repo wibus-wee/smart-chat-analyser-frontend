@@ -1,6 +1,23 @@
-# Smart Chat Analyser前端
+<p align="center">
+  <p align="center">
+    <img src=".github/icon.png" alt="Preview" width="128" />
+  </p>
+  <h1 align="center"><b>Smart Chat Analyzer Frontend</b></h1>
+  <p align="center">
+    深度分析你的聊天记录，发现隐藏的模式和洞察，让数据为你讲述故事（前端）
+    <br />
+    <br />
+    <b>Download for </b>
+    <a href="">Source Code</a>
+    <br />
+  </p>
+</p>
 
-基于 React + TypeScript + Vite 构建的现代化Smart Chat Analyser前端应用。
+> [!NOTE]
+>
+> 项目使用了 Augment Code 作为一路 Vibe Coding 的插件，但是我暂时还没找到能导出该项目聊天记录的插件。因此目前先将此项目的 Augment Memories 公布出来
+>
+> 由于维护精力的问题，该项目开源之日应该就是我的停更之日，但是非常欢迎 Issues & Pull Request
 
 ## 🚀 功能特性
 
@@ -21,69 +38,6 @@
 - **图表**: Recharts (待实现)
 - **模态框**: vaul Drawer
 
-## 📁 项目结构
-
-```
-src/
-├── components/
-│   ├── layout/           # 布局组件
-│   │   ├── AppLayout.tsx
-│   │   ├── StatusBar.tsx
-│   │   └── TopNavigation.tsx
-│   ├── analysis/         # 分析相关组件
-│   │   ├── TaskCreator.tsx
-│   │   └── TaskMonitor.tsx
-│   ├── pages/           # 页面组件
-│   │   ├── HomePage.tsx
-│   │   ├── AnalysisPage.tsx
-│   │   ├── HistoryPage.tsx
-│   │   └── SettingsPage.tsx
-│   └── ui/              # shadcn/ui 组件
-├── hooks/               # 自定义 Hooks
-│   ├── useSystemHealth.ts
-│   ├── useAnalyzers.ts
-│   └── useAnalysisTask.ts
-├── lib/
-│   ├── sdk-client.ts    # SDK 客户端实例
-│   └── utils.ts
-├── routes/              # 路由定义
-└── sdk/                 # 完整的 TypeScript SDK
-```
-
-## 🎨 设计理念
-
-### 避免传统 Dashboard 布局
-- 不使用侧边栏 + 主内容区域的传统布局
-- 采用顶部导航 + 全屏内容的现代化设计
-- 参考 Linear、GitHub 等优秀产品的设计理念
-
-### 扁平化视觉风格
-- 减少阴影的使用，避免虚假的立体感
-- 使用简洁的线条和分隔符
-- 通过色彩和动画来区分不同状态
-
-### 流畅的用户体验
-- 使用 vaul Drawer 实现任务创建界面
-- Framer Motion 提供页面切换和状态变化动画
-- 实时的任务状态更新和进度显示
-
-## 🚀 快速开始
-
-### 安装依赖
-```bash
-pnpm install
-```
-
-### 启动开发服务器
-```bash
-pnpm dev
-```
-
-### 构建生产版本
-```bash
-pnpm build
-```
-
 ## 📋 当前实现状态
 
 ### ✅ 已完成
@@ -103,29 +57,18 @@ pnpm build
 - [ ] 数据导出功能
 - [ ] 国际化支持
 
-## 🔧 开发说明
-
-### 数据获取
-- 使用 SWR 进行数据缓存和自动重新验证
-- 任务状态自动轮询更新
-- 完整的错误处理和重试机制
-
-### 动画实现
-- 页面切换使用 Framer Motion 的 AnimatePresence
-- 组件状态变化的微动画
-- 避免在 className 中使用 transition 类，防止与 Framer Motion 冲突
-
-### 组件设计
-- 避免使用 shadcn/ui 的 Card 组件
-- 使用 vaul Drawer 替代传统模态框
-- 所有图标使用 lucide-react，避免 emoji
-
 ## 📖 API 文档
 
-详细的 SDK 使用说明请参考 [README_SDK.md](./README_SDK.md)。
+详细的 SDK 使用说明请参考 [README_SDK.md](./README_SDK.md)
+
+
+## 📷 截图
+
+![screenshot](./.github/screenshot.png)
+
 
 ## Author
 
-Smart Chat Analyser Frontend © Wibus, Released under AGPLv3. Created on Jun 21, 2025
+Smart Chat Analyser Frontend © Wibus, Released under MIT. Created on Jun 21, 2025
 
 > [Personal Website](http://wibus.ren/) · [Blog](https://blog.wibus.ren/) · GitHub [@wibus-wee](https://github.com/wibus-wee/) · Telegram [@wibus✪](https://t.me/wibus_wee)
