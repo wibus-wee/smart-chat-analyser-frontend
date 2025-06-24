@@ -69,7 +69,7 @@ export function Footer() {
     <motion.footer
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mt-auto"
+      className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 mt-10"
     >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
