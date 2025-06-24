@@ -305,13 +305,13 @@ export const TrendAnalysisSchema = z.object({
 export type TrendAnalysis = z.infer<typeof TrendAnalysisSchema>;
 
 export const WeeklyDistributionSchema = z.object({
-    "周一": z.number(),
-    "周三": z.number(),
-    "周二": z.number(),
-    "周五": z.number(),
-    "周六": z.number(),
-    "周四": z.number(),
-    "周日": z.number(),
+    "周一": z.number().optional(),
+    "周三": z.number().optional(),
+    "周二": z.number().optional(),
+    "周五": z.number().optional(),
+    "周六": z.number().optional(),
+    "周四": z.number().optional(),
+    "周日": z.number().optional(),
 });
 export type WeeklyDistribution = z.infer<typeof WeeklyDistributionSchema>;
 
