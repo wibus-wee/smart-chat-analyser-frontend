@@ -4,11 +4,14 @@
   </p>
   <h1 align="center"><b>Smart Chat Analyzer Frontend</b></h1>
   <p align="center">
-    深度分析你的聊天记录，发现隐藏的模式和洞察，让数据为你讲述故事（前端）
+    深度分析你的聊天记录，发现隐藏的模式和洞察，让数据为你讲述故事
     <br />
     <br />
     <b>Download for </b>
-    <a href="">Source Code</a>
+    <a href="https://github.com/wibus-wee/smart-chat-analyser-frontend/archive/refs/heads/main.zip">Source Code</a>
+    ·
+    <b>Related Projects: </b>
+    <a href="https://github.com/wibus-wee/smart-chat-analyser">Backend Repo</a>
     <br />
   </p>
 </p>
