@@ -26,6 +26,7 @@ export const TaskSubmitResponseSchema = z.object({
   message: z.string().describe('提交消息'),
   task_type: z.string().describe('任务类型'),
   submitted_at: z.string().describe('提交时间'),
+  chat_name: z.string().optional().describe('群聊名称'),
 });
 export type TaskSubmitResponse = z.infer<typeof TaskSubmitResponseSchema>;
 
@@ -39,6 +40,7 @@ export const TaskInfoSchema = z.object({
   created_at: z.string().optional().describe('创建时间'),
   started_at: z.string().nullable().optional().describe('开始时间'),
   completed_at: z.string().nullable().optional().describe('完成时间'),
+  chat_name: z.string().nullable().optional().describe('群聊名称'),
 });
 export type TaskInfo = z.infer<typeof TaskInfoSchema>;
 
@@ -95,5 +97,6 @@ export const TaskListItemSchema = z.object({
   created_at: z.string().describe('创建时间'),
   started_at: z.string().nullable().optional().describe('开始时间'),
   completed_at: z.string().nullable().optional().describe('完成时间'),
+  chat_name: z.string().optional().describe('群聊名称'),
 });
 export type TaskListItem = z.infer<typeof TaskListItemSchema>;

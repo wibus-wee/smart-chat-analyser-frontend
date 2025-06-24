@@ -190,7 +190,7 @@ export function TaskList() {
           <TaskCreator onTaskCreated={handleTaskSelect} />
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           {tasks.map((task, index) => (
             <TaskListItem
               key={task.task_id}
@@ -279,6 +279,11 @@ function TaskListItem({
                 {getStatusText(task.status)}
               </Badge>
             </div>
+            {task.chat_name && (
+              <p className="text-sm font-medium text-foreground mb-1">
+                聊天对象: {task.chat_name}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
               {task.message ? task.message.slice(0, 55) + "..." : "暂无描述"}
             </p>

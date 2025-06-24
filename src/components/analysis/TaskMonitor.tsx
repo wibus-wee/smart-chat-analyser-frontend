@@ -206,6 +206,9 @@ export function TaskMonitor({ taskId }: TaskMonitorProps) {
             {getStatusIcon(currentStatus)}
             <div>
               <h3 className="font-semibold">任务 {taskId.slice(-8)}</h3>
+              {taskStatus?.chat_name && (
+                <p className="text-sm text-muted-foreground">群聊: {taskStatus.chat_name}</p>
+              )}
               <Badge variant={getStatusColor(currentStatus)}>
                 {getStatusText(currentStatus)}
               </Badge>
