@@ -1,42 +1,39 @@
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Progress } from '../ui/progress';
-import { 
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Progress } from "../ui/progress";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { 
-  Loader2, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
+} from "../ui/select";
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
   Clock,
-  Play,
   Square,
   RefreshCw,
   Eye,
-  Trash2
-} from 'lucide-react';
-import { useTaskList, useAnalysisTask } from '../../hooks/useAnalysisTask';
-import type { TaskStatus, TaskInfo } from '../../sdk';
+  Trash2,
+} from "lucide-react";
+import { useTaskList, useAnalysisTask } from "../../hooks/useAnalysisTask";
+import type { TaskStatus, TaskInfo } from "../../sdk";
+import { TaskCreator } from "./TaskCreator";
 
-interface TaskListProps {
-  onTaskSelect?: (taskId: string) => void;
-  onTaskCreate?: () => void;
-}
-
-export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | 'all'>('all');
+export function TaskList() {
+  const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
 
   const { taskList, isLoading, error, refresh } = useTaskList({
-    status: statusFilter === 'all' ? undefined : statusFilter,
+    status: statusFilter === "all" ? undefined : statusFilter,
     limit: pageSize,
     offset: currentPage * pageSize,
   });
@@ -45,15 +42,15 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'running':
+      case "running":
         return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed':
+      case "failed":
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'cancelled':
+      case "cancelled":
         return <Square className="h-4 w-4 text-gray-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
@@ -62,36 +59,40 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
 
   const getStatusText = (status: TaskStatus) => {
     switch (status) {
-      case 'pending':
-        return '等待中';
-      case 'running':
-        return '运行中';
-      case 'completed':
-        return '已完成';
-      case 'failed':
-        return '失败';
-      case 'cancelled':
-        return '已取消';
+      case "pending":
+        return "等待中";
+      case "running":
+        return "运行中";
+      case "completed":
+        return "已完成";
+      case "failed":
+        return "失败";
+      case "cancelled":
+        return "已取消";
       default:
-        return '未知';
+        return "未知";
     }
   };
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case 'pending':
-        return 'secondary';
-      case 'running':
-        return 'default';
-      case 'completed':
-        return 'default';
-      case 'failed':
-        return 'destructive';
-      case 'cancelled':
-        return 'secondary';
+      case "pending":
+        return "secondary";
+      case "running":
+        return "default";
+      case "completed":
+        return "default";
+      case "failed":
+        return "destructive";
+      case "cancelled":
+        return "secondary";
       default:
-        return 'secondary';
+        return "secondary";
     }
+  };
+
+  const handleTaskSelect = (taskId: string) => {
+    navigate({ to: "/analysis/$taskId", params: { taskId } });
   };
 
   const handleCancelTask = async (taskId: string) => {
@@ -99,7 +100,7 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
       await cancelTask(taskId);
       refresh();
     } catch (error) {
-      console.error('取消任务失败:', error);
+      console.error("取消任务失败:", error);
     }
   };
 
@@ -143,10 +144,13 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-semibold">任务列表</h2>
-          <Select value={statusFilter} onValueChange={(value) => {
-            setStatusFilter(value as TaskStatus | 'all');
-            setCurrentPage(0);
-          }}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value as TaskStatus | "all");
+              setCurrentPage(0);
+            }}
+          >
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -160,18 +164,13 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button onClick={() => refresh()} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             刷新
           </Button>
-          {onTaskCreate && (
-            <Button onClick={onTaskCreate} size="sm">
-              <Play className="h-4 w-4 mr-2" />
-              新建任务
-            </Button>
-          )}
+          <TaskCreator onTaskCreated={handleTaskSelect} />
         </div>
       </div>
 
@@ -182,15 +181,13 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
           <div>
             <h3 className="text-lg font-semibold">暂无任务</h3>
             <p className="text-muted-foreground">
-              {statusFilter === 'all' ? '还没有创建任何任务' : `没有${getStatusText(statusFilter as TaskStatus)}的任务`}
+              {statusFilter === "all"
+                ? "还没有创建任何任务"
+                : `没有${getStatusText(statusFilter as TaskStatus)}的任务`}
             </p>
           </div>
-          {onTaskCreate && (
-            <Button onClick={onTaskCreate}>
-              <Play className="h-4 w-4 mr-2" />
-              创建第一个任务
-            </Button>
-          )}
+
+          <TaskCreator onTaskCreated={handleTaskSelect} />
         </div>
       ) : (
         <div className="grid grid-cols-4 gap-6">
@@ -199,7 +196,7 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
               key={task.task_id}
               task={task}
               index={index}
-              onSelect={() => onTaskSelect?.(task.task_id)}
+              onSelect={() => handleTaskSelect(task.task_id)}
               onCancel={() => handleCancelTask(task.task_id)}
               getStatusIcon={getStatusIcon}
               getStatusText={getStatusText}
@@ -214,8 +211,9 @@ export function TaskList({ onTaskSelect, onTaskCreate }: TaskListProps) {
       {pagination && pagination.total > pageSize && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            显示 {pagination.offset + 1} - {Math.min(pagination.offset + pagination.limit, pagination.total)} 
-            / 共 {pagination.total} 个任务
+            显示 {pagination.offset + 1} -{" "}
+            {Math.min(pagination.offset + pagination.limit, pagination.total)}/
+            共 {pagination.total} 个任务
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -252,15 +250,15 @@ interface TaskListItemProps {
   formatDate: (date: string) => string;
 }
 
-function TaskListItem({ 
-  task, 
-  index, 
-  onSelect, 
-  onCancel, 
-  getStatusIcon, 
-  getStatusText, 
-  getStatusColor, 
-  formatDate 
+function TaskListItem({
+  task,
+  index,
+  onSelect,
+  onCancel,
+  getStatusIcon,
+  getStatusText,
+  getStatusColor,
+  formatDate,
 }: TaskListItemProps) {
   return (
     <motion.div
@@ -282,16 +280,16 @@ function TaskListItem({
               </Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {task.message ? task.message.slice(0,55) + '...' : '暂无描述'}
+              {task.message ? task.message.slice(0, 55) + "..." : "暂无描述"}
             </p>
             <p className="text-xs text-muted-foreground">
-              创建时间: {task.created_at ? formatDate(task.created_at) : '未知'}
+              创建时间: {task.created_at ? formatDate(task.created_at) : "未知"}
             </p>
           </div>
         </div>
 
         {/* 进度条 */}
-        {(task.status === 'pending' || task.status === 'running') && (
+        {(task.status === "pending" || task.status === "running") && (
           <div className="w-24 mx-4">
             <Progress value={task.progress} className="h-2" />
             <p className="text-xs text-center mt-1">{task.progress}%</p>
@@ -304,7 +302,7 @@ function TaskListItem({
             <Eye className="h-4 w-4 mr-1" />
             查看
           </Button>
-          {(task.status === 'pending' || task.status === 'running') && (
+          {(task.status === "pending" || task.status === "running") && (
             <Button onClick={onCancel} variant="outline" size="sm">
               <Trash2 className="h-4 w-4 mr-1" />
               取消

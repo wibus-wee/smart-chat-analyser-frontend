@@ -24,10 +24,9 @@ import type { TaskStatus } from '../../sdk';
 
 interface TaskMonitorProps {
   taskId: string;
-  onBack?: () => void;
 }
 
-export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
+export function TaskMonitor({ taskId }: TaskMonitorProps) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -170,11 +169,6 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
             <RefreshCw className="h-4 w-4 mr-2" />
             重试
           </Button>
-          {onBack && (
-            <Button onClick={onBack} variant="outline">
-              返回
-            </Button>
-          )}
         </div>
       </div>
     );
@@ -199,12 +193,6 @@ export function TaskMonitor({ taskId, onBack }: TaskMonitorProps) {
             </Badge>
           )}
         </div>
-        
-        {onBack && (
-          <Button onClick={onBack} variant="outline" size="sm">
-            返回
-          </Button>
-        )}
       </div>
 
       {/* 任务状态卡片 */}
