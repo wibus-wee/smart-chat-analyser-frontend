@@ -46,10 +46,7 @@ export function AnalysisDetailPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <TaskMonitor
-          taskId={taskId}
-          onBack={handleBackToList}
-        />
+        <TaskMonitor taskId={taskId}/>
       </motion.div>
     </div>
   );
